@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AspNetCoreGeneratedDocument;
+using Garage_2.Data;
+using Garage_2.Models;
+using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Garage_2.Data;
-using Garage_2.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Garage_2.Controllers
 {
@@ -78,7 +80,20 @@ namespace Garage_2.Controllers
             {
                 return NotFound();
             }
-            return View(parkedVehicle);
+
+            var vm = new ParkedVehicleEditViewModel
+            {
+                Id = parkedVehicle.Id,
+                RegistrationNumber = parkedVehicle.RegistrationNumber,
+                Make = parkedVehicle.Make,
+                Model = parkedVehicle.Model,
+                NumberOfWheels = parkedVehicle.NumberOfWheels,
+                Color = parkedVehicle.Color,
+                Type = parkedVehicle.Type,
+                ArrivalTime = parkedVehicle.ArrivalTime
+            };
+
+            return View(vm);
         }
 
         // POST: ParkedVehicles/Edit/5
@@ -86,9 +101,9 @@ namespace Garage_2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkedVehicle parkedVehicle)
+        public async Task<IActionResult> Edit(int id, ParkedVehicleEditViewModel vm)
         {
-            if (id != parkedVehicle.Id)
+            if (id != vm.Id)
             {
                 return NotFound();
             }
@@ -97,12 +112,21 @@ namespace Garage_2.Controllers
             {
                 try
                 {
-                    _context.Update(parkedVehicle);
+                    var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(p => p.Id == id);
+                    if (parkedVehicle == null) return NotFound();
+
+                    parkedVehicle.RegistrationNumber = vm.RegistrationNumber;
+                    parkedVehicle.Make = vm.Make;
+                    parkedVehicle.Model = vm.Model;
+                    parkedVehicle.NumberOfWheels = vm.NumberOfWheels;
+                    parkedVehicle.Color = vm.Color;
+                    parkedVehicle.Type = vm.Type;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ParkedVehicleExists(parkedVehicle.Id))
+                    if (!ParkedVehicleExists(vm.Id))
                     {
                         return NotFound();
                     }
@@ -113,7 +137,7 @@ namespace Garage_2.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(parkedVehicle);
+            return View(vm);
         }
 
         // GET: ParkedVehicles/Delete/5
