@@ -228,5 +228,10 @@ namespace Garage_2.Controllers
         {
             return _context.ParkedVehicle.Any(e => e.Id == id);
         }
+
+        private bool VehicleRegistrationExists(string registrationNumger)
+        {
+            return _context.ParkedVehicle.Any(vehicle => vehicle.RegistrationNumber == registrationNumger);
+        }
     }
 }
