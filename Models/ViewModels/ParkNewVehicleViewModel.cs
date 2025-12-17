@@ -2,7 +2,7 @@
 
 namespace Garage_2.Models.ViewModels
 {
-    public class ParkVehicleViewModel
+    public class ParkNewVehicleViewModel
     {
         [Required]
         [StringLength(6, MinimumLength = 6)]

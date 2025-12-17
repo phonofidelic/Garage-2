@@ -41,7 +41,7 @@ namespace Garage_2.Controllers
                 return NotFound();
             }
 
-            ParkVehicleViewModel viewModel = new()
+            ParkNewVehicleViewModel viewModel = new()
             {
                 RegistrationNumber = parkedVehicle.RegistrationNumber,
                 Make = parkedVehicle.Make,
