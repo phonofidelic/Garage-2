@@ -73,11 +73,21 @@ namespace Garage_2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkedVehicle parkedVehicle)
+        public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkNewVehicleViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                parkedVehicle.ArrivalTime = DateTime.UtcNow;
+                ParkedVehicle parkedVehicle = new()
+                {
+                    RegistrationNumber = viewModel.RegistrationNumber,
+                    Make = viewModel.Make,
+                    Model = viewModel.Model,
+                    NumberOfWheels = viewModel.NumberOfWheels,
+                    Color = viewModel.Color,
+                    ArrivalTime = DateTime.Now,
+                    Type = viewModel.Type
+                };
+
                 _context.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

@@ -26,6 +26,7 @@ namespace Garage_2.Models.ViewModels
         [StringLength(100)]
         public string Color { get; set; } = default!;
 
+        public DateTime ArrivalTime { get; set; }
 
         [Required]
         public VehicleType Type { get; set; }
