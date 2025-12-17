@@ -30,8 +30,14 @@ namespace Garage_2.Controllers
                 vehicles = vehicles.Where(v => v.RegistrationNumber.Contains(searchString));
             }
 
-            // Execute the query and return the filtered results to the view
-            return View(await vehicles.ToListAsync());
+            // Execute the query, put the data into overviewmodel and return view
+            return View(await vehicles.Select(v => new OverviewViewModel
+            {
+                Id = v.Id,
+                RegistrationNUmber = v.RegistrationNumber,
+                Type = v.Type,
+                ArrivalTime = v.ArrivalTime
+            }).ToListAsync());
         }
 
         // GET: ParkedVehicles/Details/5
