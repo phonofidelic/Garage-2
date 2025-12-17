@@ -60,6 +60,7 @@ namespace Garage_2.Controllers
         {
             if (ModelState.IsValid)
             {
+                parkedVehicle.ArrivalTime = DateTime.UtcNow;
                 _context.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
