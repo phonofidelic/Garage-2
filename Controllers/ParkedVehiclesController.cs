@@ -1,14 +1,13 @@
-﻿using AspNetCoreGeneratedDocument;
-using Garage_2.Data;
-using Garage_2.Models;
-using Garage_2.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Garage_2.Data;
+using Garage_2.Models;
+using Garage_2.Models.ViewModels;
 
 namespace Garage_2.Controllers
 {
@@ -42,7 +41,17 @@ namespace Garage_2.Controllers
                 return NotFound();
             }
 
-            return View(parkedVehicle);
+            ParkVehicleViewModel viewModel = new()
+            {
+                RegistrationNumber = parkedVehicle.RegistrationNumber,
+                Make = parkedVehicle.Make,
+                Model = parkedVehicle.Model,
+                NumberOfWheels = parkedVehicle.NumberOfWheels,
+                Color = parkedVehicle.Color,
+                Type = parkedVehicle.Type
+            };
+
+            return View(viewModel);
         }
 
         // GET: ParkedVehicles/Create
