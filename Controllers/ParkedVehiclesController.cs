@@ -40,7 +40,7 @@ namespace Garage_2.Controllers
             {
                 return NotFound();
             }
-            
+
             return View(parkedVehicle);
         }
 
@@ -188,6 +188,21 @@ namespace Garage_2.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: ParkedVehicles
+        public async Task<IActionResult> Index(string? searchString)
+        {
+            ViewData["CurrentFilter"] = searchString;
+
+            var vehicles = from v in _context.ParkedVehicle select v;
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                vehicles = vehicles.Where(v => v.RegistrationNumber.Contains(searchString));
+            }
+
+            return View(await vehicles.ToListAsync());
         }
 
         private bool ParkedVehicleExists(int id)
