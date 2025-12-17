@@ -1,8 +1,6 @@
 ﻿using Garage_2.Data;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Controllers
 {
@@ -36,11 +34,21 @@ namespace Garage_2.Controllers
                 return NotFound();
             }
 
-            return View(parkedVehicle);
+            ParkNewVehicleViewModel viewModel = new()
+            {
+                RegistrationNumber = parkedVehicle.RegistrationNumber,
+                Make = parkedVehicle.Make,
+                Model = parkedVehicle.Model,
+                NumberOfWheels = parkedVehicle.NumberOfWheels,
+                Color = parkedVehicle.Color,
+                Type = parkedVehicle.Type
+            };
+
+            return View(viewModel);
         }
 
         // GET: ParkedVehicles/Create
-        public IActionResult Create()
+        public IActionResult ParkNewVehicle()
         {
             return View();
         }
@@ -50,10 +58,11 @@ namespace Garage_2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkedVehicle parkedVehicle)
+        public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkedVehicle parkedVehicle)
         {
             if (ModelState.IsValid)
             {
+                parkedVehicle.ArrivalTime = DateTime.UtcNow;
                 _context.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -62,19 +71,34 @@ namespace Garage_2.Controllers
         }
 
         // GET: ParkedVehicles/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> EditVehicle(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
+            // Retrieve the parked vehicle by id.
             var parkedVehicle = await _context.ParkedVehicle.FindAsync(id);
             if (parkedVehicle == null)
             {
                 return NotFound();
             }
-            return View(parkedVehicle);
+
+            // Map entity to an EditViewModel; only expose fields that are editable.
+            var vm = new ParkedVehicleEditViewModel
+            {
+                Id = parkedVehicle.Id,
+                RegistrationNumber = parkedVehicle.RegistrationNumber,
+                Make = parkedVehicle.Make,
+                Model = parkedVehicle.Model,
+                NumberOfWheels = parkedVehicle.NumberOfWheels,
+                Color = parkedVehicle.Color,
+                Type = parkedVehicle.Type,
+                ArrivalTime = parkedVehicle.ArrivalTime
+            };
+
+            return View(vm);
         }
 
         // POST: ParkedVehicles/Edit/5
@@ -82,9 +106,9 @@ namespace Garage_2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkedVehicle parkedVehicle)
+        public async Task<IActionResult> EditVehicle(int id, ParkedVehicleEditViewModel vm)
         {
-            if (id != parkedVehicle.Id)
+            if (id != vm.Id)
             {
                 return NotFound();
             }
@@ -93,12 +117,25 @@ namespace Garage_2.Controllers
             {
                 try
                 {
-                    _context.Update(parkedVehicle);
+                    // Fetch the entity to update
+                    var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(p => p.Id == id);
+
+                    if (parkedVehicle == null) return NotFound();
+
+                    // Update allowed fields from the view model.
+                    parkedVehicle.RegistrationNumber = vm.RegistrationNumber;
+                    parkedVehicle.Make = vm.Make;
+                    parkedVehicle.Model = vm.Model;
+                    parkedVehicle.NumberOfWheels = vm.NumberOfWheels;
+                    parkedVehicle.Color = vm.Color;
+                    parkedVehicle.Type = vm.Type;
+
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ParkedVehicleExists(parkedVehicle.Id))
+                    if (!ParkedVehicleExists(vm.Id))
                     {
                         return NotFound();
                     }
@@ -109,7 +146,7 @@ namespace Garage_2.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(parkedVehicle);
+            return View(vm);
         }
 
         // GET: ParkedVehicles/Delete/5
@@ -130,20 +167,6 @@ namespace Garage_2.Controllers
             return View(parkedVehicle);
         }
 
-        // POST: ParkedVehicles/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> UnparkConfirmed(int id)
-        //{
-        //    var parkedVehicle = await _context.ParkedVehicle.FindAsync(id);
-        //    if (parkedVehicle != null)
-        //    {
-        //        _context.ParkedVehicle.Remove(parkedVehicle);
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(Index));
-        //}
 
         [HttpPost, ActionName("UnparkConfirmed")]
         [ValidateAntiForgeryToken]
