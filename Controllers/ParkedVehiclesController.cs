@@ -21,9 +21,22 @@ namespace Garage_2.Controllers
         }
 
         // GET: ParkedVehicles
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchString)
         {
-            return View(await _context.ParkedVehicle.ToListAsync());
+            // Store the search string in ViewData
+            ViewData["CurrentFilter"] = searchString;
+
+            // Start with all vehicles from the database
+            var vehicles = from v in _context.ParkedVehicle select v;
+
+            // Filter vehicles by registration number if a search string is provided
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                vehicles = vehicles.Where(v => v.RegistrationNumber.Contains(searchString));
+            }
+
+            // Execute the query and return the filtered results to the view
+            return View(await vehicles.ToListAsync());
         }
 
         // GET: ParkedVehicles/Details/5
@@ -188,21 +201,6 @@ namespace Garage_2.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        // GET: ParkedVehicles
-        public async Task<IActionResult> Index(string? searchString)
-        {
-            ViewData["CurrentFilter"] = searchString;
-
-            var vehicles = from v in _context.ParkedVehicle select v;
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                vehicles = vehicles.Where(v => v.RegistrationNumber.Contains(searchString));
-            }
-
-            return View(await vehicles.ToListAsync());
         }
 
         private bool ParkedVehicleExists(int id)
