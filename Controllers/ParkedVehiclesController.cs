@@ -49,7 +49,8 @@ namespace Garage_2.Controllers
                 return NotFound();
             }
 
-            return View(parkedVehicle);
+            //return View(parkedVehicle);
+            return View(new DetailsViewModel(parkedVehicle));
         }
 
         // GET: ParkedVehicles/ParkNewVehicle
