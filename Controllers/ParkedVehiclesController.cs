@@ -75,12 +75,14 @@ namespace Garage_2.Controllers
                 return NotFound();
             }
 
+            // Retrieve the parked vehicle by id.
             var parkedVehicle = await _context.ParkedVehicle.FindAsync(id);
             if (parkedVehicle == null)
             {
                 return NotFound();
             }
 
+            // Map entity to an EditViewModel; only expose fields that are editable.
             var vm = new ParkedVehicleEditViewModel
             {
                 Id = parkedVehicle.Id,
@@ -112,15 +114,19 @@ namespace Garage_2.Controllers
             {
                 try
                 {
+                    // Fetch the entity to update
                     var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(p => p.Id == id);
+
                     if (parkedVehicle == null) return NotFound();
 
+                    // Update allowed fields from the view model.
                     parkedVehicle.RegistrationNumber = vm.RegistrationNumber;
                     parkedVehicle.Make = vm.Make;
                     parkedVehicle.Model = vm.Model;
                     parkedVehicle.NumberOfWheels = vm.NumberOfWheels;
                     parkedVehicle.Color = vm.Color;
                     parkedVehicle.Type = vm.Type;
+
 
                     await _context.SaveChangesAsync();
                 }

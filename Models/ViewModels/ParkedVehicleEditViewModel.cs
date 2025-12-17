@@ -21,7 +21,7 @@ namespace Garage_2.Models.ViewModels
         [Required, StringLength(100)]
         public string Color { get; set; } = default!;
 
-        // Visas i vyn, men ska inte kunna ändras
+        // Visible in edit view, but can not be changed.
         public DateTime ArrivalTime { get; set; }
 
         [Required]
