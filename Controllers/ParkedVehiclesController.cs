@@ -40,27 +40,17 @@ namespace Garage_2.Controllers
             {
                 return NotFound();
             }
-
-            ParkNewVehicleViewModel viewModel = new()
-            {
-                RegistrationNumber = parkedVehicle.RegistrationNumber,
-                Make = parkedVehicle.Make,
-                Model = parkedVehicle.Model,
-                NumberOfWheels = parkedVehicle.NumberOfWheels,
-                Color = parkedVehicle.Color,
-                Type = parkedVehicle.Type
-            };
-
-            return View(viewModel);
+            
+            return View(parkedVehicle);
         }
 
-        // GET: ParkedVehicles/Create
+        // GET: ParkedVehicles/ParkNewVehicle
         public IActionResult ParkNewVehicle()
         {
             return View();
         }
 
-        // POST: ParkedVehicles/Create
+        // POST: ParkedVehicles/ParkNewVehicle
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -74,7 +64,18 @@ namespace Garage_2.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(parkedVehicle);
+
+            ParkNewVehicleViewModel viewModel = new()
+            {
+                RegistrationNumber = parkedVehicle.RegistrationNumber,
+                Make = parkedVehicle.Make,
+                Model = parkedVehicle.Model,
+                NumberOfWheels = parkedVehicle.NumberOfWheels,
+                Color = parkedVehicle.Color,
+                Type = parkedVehicle.Type
+            };
+
+            return View(viewModel);
         }
 
         // GET: ParkedVehicles/Edit/5
