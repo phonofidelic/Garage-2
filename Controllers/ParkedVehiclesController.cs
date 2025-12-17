@@ -75,6 +75,11 @@ namespace Garage_2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkNewVehicleViewModel viewModel)
         {
+            if (VehicleRegistrationExists(viewModel.RegistrationNumber))
+            {
+                ModelState.AddModelError(nameof(viewModel.RegistrationNumber), errorMessage: "A vehicle with that registration number is already parked in this garage.");
+            }
+
             if (ModelState.IsValid)
             {
                 ParkedVehicle parkedVehicle = new()
@@ -92,16 +97,6 @@ namespace Garage_2.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
-            ParkNewVehicleViewModel viewModel = new()
-            {
-                RegistrationNumber = parkedVehicle.RegistrationNumber,
-                Make = parkedVehicle.Make,
-                Model = parkedVehicle.Model,
-                NumberOfWheels = parkedVehicle.NumberOfWheels,
-                Color = parkedVehicle.Color,
-                Type = parkedVehicle.Type
-            };
 
             return View(viewModel);
         }
