@@ -1,0 +1,22 @@
+﻿@using Garage_2.Models.ViewModels
+@model ReceiptViewModel
+
+<h2>Thank you for parking with us! </h2>
+
+<h4>Your receipt:</h4>
+
+	<p><strong>Registration number:</strong> @Model.RegistrationNumber</p>
+	<p><strong>Vehicle type:</strong> @Model.Type</p>
+
+	<hr />
+
+	<p><strong>Arrival time:</strong> @Model.ArrivalTime</p>
+	<p><strong>Checkout time:</strong> @Model.CheckoutTime</p>
+	<p><strong>Parking duration:</strong> @($"{(int)Model.ParkingDuration.TotalHours} h {Model.ParkingDuration.Minutes} min")</p>
+       
+
+	<hr />
+
+	<h4>Total price: @Model.Price SEK</h4>
+
+<button onclick="window.print()" class="btn btn-primary">Print receipt</button>
