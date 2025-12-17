@@ -12,8 +12,10 @@ namespace Garage_2.Data
 
             GarageContext context = appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<GarageContext>();
 
+            // Fyll bara på med seed-data om db är tom (dvs ingen överskrivning av befintligt data)
+            if (!context.ParkedVehicle.Any())
+                context.ParkedVehicle.AddRange(parkedVehiclesList);
 
-            if (!context.ParkedVehicle.Any()) context.ParkedVehicle.AddRange(parkedVehiclesList);
 
             context.SaveChanges();
         }
