@@ -1,6 +1,8 @@
 ﻿using Garage_2.Data;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Controllers
 {
@@ -33,7 +35,7 @@ namespace Garage_2.Controllers
             {
                 return NotFound();
             }
-            
+
             return View(parkedVehicle);
         }
 
