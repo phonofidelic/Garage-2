@@ -1,0 +1,69 @@
+﻿@model IEnumerable<Garage_2.Models.ViewModels.OverviewViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+@if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
+{
+    <div class="position-fixed w-100 bottom-0 start-0 mb-3">
+        <div class="alert alert-@type alert-dismissible fade show shadow  w-75 m-auto" role="alert">
+            @Html.Raw(alert)
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+}
+
+<div class="row my-4">
+    <div class="col-auto">
+        <a asp-action="ParkNewVehicle" class="btn btn-primary">Park new vehicle</a>
+    </div>
+    <div class="col text-end">
+        <partial name="_SearchPartial" />
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.RegistrationNUmber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ArrivalTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ParkedTime)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td class="text-nowrap">
+                @Html.DisplayFor(modelItem => item.RegistrationNUmber)
+            </td>
+                <td class="text-nowrap">
+                @Html.DisplayFor(modelItem => item.ArrivalTime)
+            </td>
+                <td class="text-nowrap">
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+                <td class="text-nowrap">
+                @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m")
+            </td>
+            <td>
+                <div class="d-flex flex-nowrap gap-2">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary text-nowrap">Details</a>
+                    <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary text-nowrap">Edit</a>
+                    <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-nowrap">Check out</a>
+                </div>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
