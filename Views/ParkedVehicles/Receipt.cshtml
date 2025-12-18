@@ -22,11 +22,11 @@
 	<p><strong>Arrival time:</strong> @Model.ArrivalTime</p>
 	<p><strong>Checkout time:</strong> @Model.CheckoutTime</p>
 	<p><strong>Parking duration:</strong> @($"{(int)Model.ParkingDuration.TotalHours} h {Model.ParkingDuration.Minutes} min")</p>
-       
+
 
 	<hr />
 
 	<h4>Total price: @Model.Price SEK</h4>
 
-<a class="btn btn-primary no-print" asp-action="Index">Back to List</a>
-<button onclick="window.print()" class="btn btn-primary no-print">Print receipt</button>
+<a class="btn btn-outline-secondary no-print" asp-action="Index">Back to List</a>
+<button onclick="window.print()" class="btn btn-success no-print">Print receipt</button>
