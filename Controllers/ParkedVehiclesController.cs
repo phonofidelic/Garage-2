@@ -204,14 +204,18 @@ namespace Garage_2.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["AlertType"] = "warning";
+                TempData["AlertMessage"] = "Vehicle not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
 
             if (parkedVehicle == null)
             {
-                return NotFound();
+                TempData["AlertType"] = "warning";
+                TempData["AlertMessage"] = "Vehicle not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(parkedVehicle);
@@ -225,7 +229,11 @@ namespace Garage_2.Controllers
             var vehicle = await _context.ParkedVehicle.FindAsync(id);
 
             if (vehicle == null)
-                return NotFound();
+            { //return NotFound();
+                TempData["AlertType"] = "warning";
+                TempData["AlertMessage"] = "Vehicle not found.";
+                return RedirectToAction(nameof(Index));
+            }
 
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
@@ -243,6 +251,7 @@ namespace Garage_2.Controllers
                 Price = totalPrice
             };
 
+            // Todo: try-catch här
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
@@ -261,5 +270,6 @@ namespace Garage_2.Controllers
         {
             return _context.ParkedVehicle.Any(vehicle => vehicle.RegistrationNumber == registrationNumger);
         }
+
     }
 }
