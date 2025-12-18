@@ -1,18 +1,22 @@
 ﻿using Garage_2.Data;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
+using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Garage_2.Controllers
 {
     public class ParkedVehiclesController : Controller
     {
         private readonly GarageContext _context;
+        private readonly GarageConfig _config;
 
-        public ParkedVehiclesController(GarageContext context)
+        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config)
         {
             _context = context;
+            _config = config.Value;
         }
 
         // GET: ParkedVehicles
@@ -49,7 +53,6 @@ namespace Garage_2.Controllers
                 return NotFound();
             }
 
-            //return View(parkedVehicle);
             return View(new DetailsViewModel(parkedVehicle));
         }
 
@@ -197,10 +200,7 @@ namespace Garage_2.Controllers
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
 
-            // PRIS HÄR?? 
-            // TODO: Borde nog ligga i appsettings
-            decimal pricePerHour = 20m;
-            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * pricePerHour;
+            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour;
 
             var receipt = new ReceiptViewModel
             {
