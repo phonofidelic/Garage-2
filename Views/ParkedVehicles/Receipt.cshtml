@@ -1,5 +1,4 @@
-﻿@using Garage_2.Models.ViewModels
-@model ReceiptViewModel
+﻿@model ReceiptViewModel
 
 <h2>Thank you for parking with us! </h2>
 
@@ -19,5 +18,5 @@
 
 	<h4>Total price: @Model.Price SEK</h4>
 
-<a asp-action="Index">Back to List</a>
-<button onclick="window.print()" class="btn btn-primary">Print receipt</button>
+<a class="btn btn-primary no-print" asp-action="Index">Back to List</a>
+<button onclick="window.print()" class="btn btn-primary no-print">Print receipt</button>
