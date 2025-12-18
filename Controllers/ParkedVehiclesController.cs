@@ -48,14 +48,16 @@ namespace Garage_2.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
+                return RedirectToAction(nameof(Index));
             }
 
-            var parkedVehicle = await _context.ParkedVehicle
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+
             if (parkedVehicle == null)
             {
-                return NotFound();
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
+                return RedirectToAction(nameof(Index));
             }
 
             return View(new DetailsViewModel(parkedVehicle));
@@ -95,8 +97,8 @@ namespace Garage_2.Controllers
                 _context.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
 
-                TempData["AlertType"] = "success";
-                TempData["AlertMessage"] = $"Vehicle with <strong>RegNum: {viewModel.RegistrationNumber}</strong> has been parked.";
+                SetAlertInTempData(AlertType.success, $"Vehicle with <strong>RegNum: {viewModel.RegistrationNumber}</strong> has been parked.");
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -108,9 +110,7 @@ namespace Garage_2.Controllers
         {
             if (id == null)
             {
-
-                TempData["AlertType"] = "warning";
-                TempData["AlertMessage"] = "Vehicle not found.";
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -118,8 +118,7 @@ namespace Garage_2.Controllers
             var parkedVehicle = await _context.ParkedVehicle.FindAsync(id);
             if (parkedVehicle == null)
             {
-                TempData["AlertType"] = "warning";
-                TempData["AlertMessage"] = "Vehicle not found.";
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -148,8 +147,7 @@ namespace Garage_2.Controllers
         {
             if (id != vm.Id)
             {
-                TempData["AlertType"] = "warning";
-                TempData["AlertMessage"] = "Vehicle not found.";
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -162,8 +160,7 @@ namespace Garage_2.Controllers
 
                     if (parkedVehicle == null)
                     {
-                        TempData["AlertType"] = "warning";
-                        TempData["AlertMessage"] = "Vehicle not found.";
+                        SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -186,8 +183,7 @@ namespace Garage_2.Controllers
                 {
                     if (!ParkedVehicleExists(vm.Id))
                     {
-                        TempData["AlertType"] = "warning";
-                        TempData["AlertMessage"] = "Vehicle not found.";
+                        SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                         return RedirectToAction(nameof(Index));
                     }
                     else
@@ -204,8 +200,7 @@ namespace Garage_2.Controllers
         {
             if (id == null)
             {
-                TempData["AlertType"] = "warning";
-                TempData["AlertMessage"] = "Vehicle not found.";
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -213,8 +208,7 @@ namespace Garage_2.Controllers
 
             if (parkedVehicle == null)
             {
-                TempData["AlertType"] = "warning";
-                TempData["AlertMessage"] = "Vehicle not found.";
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -230,8 +224,7 @@ namespace Garage_2.Controllers
 
             if (vehicle == null)
             { //return NotFound();
-                TempData["AlertType"] = "warning";
-                TempData["AlertMessage"] = "Vehicle not found.";
+                SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -255,8 +248,7 @@ namespace Garage_2.Controllers
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            TempData["AlertType"] = "success";
-            TempData["AlertMessage"] = $"Vehicle with RegNo: <strong>{receiptVM.RegistrationNumber}</strong> has been checked out.";
+            SetAlertInTempData(AlertType.success, $"Vehicle with RegNo: <strong>{receiptVM.RegistrationNumber}</strong> has been checked out.");
 
             return View("Receipt", receiptVM);
         }
@@ -269,6 +261,12 @@ namespace Garage_2.Controllers
         private bool VehicleRegistrationExists(string registrationNumger)
         {
             return _context.ParkedVehicle.Any(vehicle => vehicle.RegistrationNumber == registrationNumger);
+        }
+
+        private void SetAlertInTempData(AlertType type, string message)
+        {
+            TempData["AlertType"] = type.ToString().ToLower(); // "success", "warning", "danger", "info"
+            TempData["AlertMessage"] = message;
         }
 
     }
