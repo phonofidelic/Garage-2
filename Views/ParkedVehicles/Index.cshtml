@@ -57,9 +57,9 @@
                 @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m")
             </td>
             <td>
-                <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary">Details</a>
-                <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-primary">Check out</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Check out</a>
             </td>
         </tr>
 }
