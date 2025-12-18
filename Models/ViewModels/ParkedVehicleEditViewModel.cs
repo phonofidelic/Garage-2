@@ -14,6 +14,8 @@ namespace Garage_2.Models.ViewModels
             get => _registrationNumber;
             set => _registrationNumber = value?.ToUpper() ?? default!;
         }
+        [Display(Name = "Registration number")]
+        public string RegistrationNumber { get; set; } = default!;
 
         [Required, StringLength(100)]
         public string Make { get; set; } = default!;
@@ -22,12 +24,14 @@ namespace Garage_2.Models.ViewModels
         public string Model { get; set; } = default!;
 
         [Required, Range(0, 22)]
+        [Display(Name = "Number of wheels")]
         public int NumberOfWheels { get; set; }
 
         [Required, StringLength(100)]
         public string Color { get; set; } = default!;
 
         // Visible in edit view, but can not be changed.
+        [Display(Name = "Arrival time")]
         public DateTime ArrivalTime { get; set; }
 
         [Required]
