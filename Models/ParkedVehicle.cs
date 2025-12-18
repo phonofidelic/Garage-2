@@ -8,6 +8,7 @@ namespace Garage_2.Models
 
         [Required]
         [StringLength(6, MinimumLength = 6)]
+        [Display(Name = "Registration number")]
         public string RegistrationNumber { get; set; } = default!;
 
         [Required]
@@ -20,6 +21,7 @@ namespace Garage_2.Models
 
         [Required]
         [Range(0, 22)]
+        [Display(Name = "Number of wheels")]
         public int NumberOfWheels { get; set; }
 
         [Required]
@@ -27,6 +29,7 @@ namespace Garage_2.Models
         public string Color { get; set; } = default!;
 
         [Required]
+        [Display(Name = "Arrival time")]
         public DateTime ArrivalTime { get; set; }
 
         [Required]
