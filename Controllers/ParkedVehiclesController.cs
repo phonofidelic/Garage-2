@@ -105,14 +105,19 @@ namespace Garage_2.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+
+                TempData["AlertType"] = "warning";
+                TempData["AlertMessage"] = "Vehicle not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             // Retrieve the parked vehicle by id.
             var parkedVehicle = await _context.ParkedVehicle.FindAsync(id);
             if (parkedVehicle == null)
             {
-                return NotFound();
+                TempData["AlertType"] = "warning";
+                TempData["AlertMessage"] = "Vehicle not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             // Map entity to an EditViewModel; only expose fields that are editable.
@@ -140,7 +145,9 @@ namespace Garage_2.Controllers
         {
             if (id != vm.Id)
             {
-                return NotFound();
+                TempData["AlertType"] = "warning";
+                TempData["AlertMessage"] = "Vehicle not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -150,7 +157,12 @@ namespace Garage_2.Controllers
                     // Fetch the entity to update
                     var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(p => p.Id == id);
 
-                    if (parkedVehicle == null) return NotFound();
+                    if (parkedVehicle == null)
+                    {
+                        TempData["AlertType"] = "warning";
+                        TempData["AlertMessage"] = "Vehicle not found.";
+                        return RedirectToAction(nameof(Index));
+                    }
 
                     // Update allowed fields from the view model.
                     parkedVehicle.RegistrationNumber = vm.RegistrationNumber;
@@ -162,19 +174,24 @@ namespace Garage_2.Controllers
 
 
                     await _context.SaveChangesAsync();
+                    TempData["AlertType"] = "success";
+                    TempData["AlertMessage"] = "Vehicle updated successfully.";
+                    return RedirectToAction(nameof(Index));
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ParkedVehicleExists(vm.Id))
                     {
-                        return NotFound();
+                        TempData["AlertType"] = "warning";
+                        TempData["AlertMessage"] = "Vehicle not found.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(vm);
         }
