@@ -1,7 +1,6 @@
 ﻿using Garage_2.Data;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
-using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -211,6 +210,7 @@ namespace Garage_2.Controllers
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
 
+            // Price calculated on every started hour
             decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour;
 
             var receipt = new ReceiptViewModel
