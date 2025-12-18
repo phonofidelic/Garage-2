@@ -4,8 +4,6 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
 @if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
 {
     <div class="position-fixed w-100 bottom-0 start-0 mb-3">
@@ -16,11 +14,15 @@
     </div>
 }
 
-<partial name="_SearchPartial" />
+<div class="row my-4">
+    <div class="col-auto">
+        <a asp-action="ParkNewVehicle" class="btn btn-primary">Park new vehicle</a>
+    </div>
+    <div class="col text-end">
+        <partial name="_SearchPartial" />
+    </div>
+</div>
 
-<p>
-    <a asp-action="ParkNewVehicle">Park new vehicle</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -55,9 +57,9 @@
                 @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m")
             </td>
             <td>
-                <a asp-action="EditVehicle" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="UnParkVehicle" asp-route-id="@item.Id">Check out</a>
+                <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary">Details</a>
+                <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-primary">Check out</a>
             </td>
         </tr>
 }
