@@ -9,7 +9,7 @@
 @if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
 {
     <div class="alert alert-@type alert-dismissible fade show" role="alert">
-        @alert
+        @Html.Raw(alert)
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }

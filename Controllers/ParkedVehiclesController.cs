@@ -176,7 +176,7 @@ namespace Garage_2.Controllers
 
                     await _context.SaveChangesAsync();
                     TempData["AlertType"] = "success";
-                    TempData["AlertMessage"] = "Vehicle updated successfully.";
+                    TempData["AlertMessage"] = $"Vehicle with <strong>RegNum: {parkedVehicle.RegistrationNumber}</strong> was updated successfully.";
                     return RedirectToAction(nameof(Index));
 
                 }
