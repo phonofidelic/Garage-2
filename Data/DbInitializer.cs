@@ -20,12 +20,14 @@ namespace Garage_2.Data
             context.SaveChanges();
         }
 
+
         // Seed-data – Lista av vehicles av alla typer i applikationen (Car, Motorcycle, Bus, Boat)
         // Olika parkeringsdatum (ArrivalTime) för att kunna få ut lite olika priser vid uthämtning av fordonet
         public static List<ParkedVehicle> parkedVehiclesList
         {
             get
             {
+                DateTime now = DateTime.Now;
                 var vehicles = new List<ParkedVehicle>();
 
                 vehicles.Add(new ParkedVehicle
@@ -36,7 +38,7 @@ namespace Garage_2.Data
                     Model = "XC60",
                     NumberOfWheels = 4,
                     RegistrationNumber = "ABC123",
-                    ArrivalTime = new DateTime(2025, 12, 17, 13, 10, 10)
+                    ArrivalTime = now.AddMinutes(-30)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -47,7 +49,7 @@ namespace Garage_2.Data
                     Model = "320i",
                     NumberOfWheels = 4,
                     RegistrationNumber = "DEF456",
-                    ArrivalTime = new DateTime(2025, 12, 10, 09, 30, 00)
+                    ArrivalTime = now.AddHours(-1)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -58,7 +60,7 @@ namespace Garage_2.Data
                     Model = "Model 3",
                     NumberOfWheels = 4,
                     RegistrationNumber = "GHI789",
-                    ArrivalTime = new DateTime(2025, 12, 9, 14, 45, 00)
+                    ArrivalTime = now.AddHours(-5)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -69,7 +71,7 @@ namespace Garage_2.Data
                     Model = "MT-07",
                     NumberOfWheels = 2,
                     RegistrationNumber = "JKL321",
-                    ArrivalTime = new DateTime(2025, 3, 11, 10, 05, 00)
+                    ArrivalTime = now.AddHours(-12)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -80,7 +82,7 @@ namespace Garage_2.Data
                     Model = "CBR600RR",
                     NumberOfWheels = 2,
                     RegistrationNumber = "MNO654",
-                    ArrivalTime = new DateTime(2025, 11, 8, 16, 20, 00)
+                    ArrivalTime = now.AddHours(-24)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -91,7 +93,7 @@ namespace Garage_2.Data
                     Model = "A6",
                     NumberOfWheels = 4,
                     RegistrationNumber = "PQR987",
-                    ArrivalTime = new DateTime(2025, 11, 7, 11, 00, 00)
+                    ArrivalTime = now.AddDays(-2)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -102,7 +104,7 @@ namespace Garage_2.Data
                     Model = "Golf",
                     NumberOfWheels = 4,
                     RegistrationNumber = "STU159",
-                    ArrivalTime = new DateTime(2025, 11, 11, 07, 50, 00)
+                    ArrivalTime = now.AddDays(-14)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -113,7 +115,7 @@ namespace Garage_2.Data
                     Model = "Citywide",
                     NumberOfWheels = 6,
                     RegistrationNumber = "VWX753",
-                    ArrivalTime = new DateTime(2025, 10, 6, 06, 30, 00)
+                    ArrivalTime = now.AddMonths(-1)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -124,7 +126,7 @@ namespace Garage_2.Data
                     Model = "7900 Electric",
                     NumberOfWheels = 6,
                     RegistrationNumber = "YZA852",
-                    ArrivalTime = new DateTime(2025, 10, 10, 12, 10, 00)
+                    ArrivalTime = now
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -135,7 +137,7 @@ namespace Garage_2.Data
                     Model = "27 Nova",
                     NumberOfWheels = 0,
                     RegistrationNumber = "BCD246",
-                    ArrivalTime = new DateTime(2025, 10, 5, 15, 40, 00)
+                    ArrivalTime = now.AddYears(-1)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -146,7 +148,7 @@ namespace Garage_2.Data
                     Model = "63 DC",
                     NumberOfWheels = 0,
                     RegistrationNumber = "EFG369",
-                    ArrivalTime = new DateTime(2025, 9, 9, 18, 25, 00)
+                    ArrivalTime = now.AddMinutes(-25)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -157,7 +159,7 @@ namespace Garage_2.Data
                     Model = "Corolla",
                     NumberOfWheels = 4,
                     RegistrationNumber = "HIJ741",
-                    ArrivalTime = new DateTime(2025, 9, 11, 13, 55, 00)
+                    ArrivalTime = now.AddMinutes(-45)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -168,7 +170,7 @@ namespace Garage_2.Data
                     Model = "Focus",
                     NumberOfWheels = 4,
                     RegistrationNumber = "KLM963",
-                    ArrivalTime = new DateTime(2025, 9, 8, 09, 10, 00)
+                    ArrivalTime = now.AddHours(-3.5)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -179,7 +181,7 @@ namespace Garage_2.Data
                     Model = "Monster",
                     NumberOfWheels = 2,
                     RegistrationNumber = "NOP147",
-                    ArrivalTime = new DateTime(2025, 8, 10, 17, 35, 00)
+                    ArrivalTime = now.AddHours(-4.5)
                 });
 
                 vehicles.Add(new ParkedVehicle
@@ -190,7 +192,7 @@ namespace Garage_2.Data
                     Model = "C220",
                     NumberOfWheels = 4,
                     RegistrationNumber = "QRS258",
-                    ArrivalTime = new DateTime(2025, 8, 6, 08, 00, 00)
+                    ArrivalTime = now.AddHours(-36)
                 });
 
                 return vehicles;
