@@ -14,28 +14,36 @@
     </div>
 }
 
-<div class="row my-4">
-    <div class="col-auto">
-        <a asp-action="ParkNewVehicle" class="btn btn-primary">Park new vehicle</a>
-    </div>
-    <div class="col text-end">
-        <partial name="_SearchPartial" />
+<div 
+    class="position-fixed bg-body start-0 end-0 z-1"
+    style="top: 48px; @@media (min-width: 768px) { top: 57px }">
+    <div class="container d-flex p-3 px-4 gap-2">
+        <div class="col-3">
+            <a asp-action="ParkNewVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Park 
+                <span class="d-none d-sm-inline">new vehicle</span>
+            </a>
+        </div>
+        <div class="col-9">
+            <partial name="_SearchPartial" />
+        </div>
     </div>
 </div>
 
-<table class="table">
-    <thead>
+<table class="table" style="margin-top: 108px">
+    <thead 
+        class="position-sticky w-100 bg-body p-3 h-100 mt-0 z-2" 
+           style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
-            <th>
+            <th td class="text-nowrap">
                 @Html.DisplayNameFor(model => model.RegistrationNumber)
             </th>
-            <th>
+            <th td class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ArrivalTime)
             </th>
-            <th>
+            <th td class="text-nowrap">
                 @Html.DisplayNameFor(model => model.Type)
             </th>
-            <th>
+            <th td class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ParkedTime)
             </th>
             <th></th>
