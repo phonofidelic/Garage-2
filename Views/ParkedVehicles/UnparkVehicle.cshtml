@@ -54,10 +54,10 @@
             @Html.DisplayFor(model => model.Type)
         </dd>
     </dl>
-    
-    <form asp-action="UnparkConfirmed">
+
+	<form asp-action="UnparkConfirmed">
+		<a class="btn btn-primary" asp-action="Index">Back to List</a>
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Check out vehicle" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Check out vehicle" class="btn btn-primary" />         
     </form>
 </div>

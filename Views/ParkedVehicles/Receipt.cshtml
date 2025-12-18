@@ -2,6 +2,16 @@
 
 <h2>Thank you for parking with us! </h2>
 
+@if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
+{
+	<div class="position-fixed w-100 bottom-0 start-0 mb-3">
+		<div class="alert alert-@type alert-dismissible fade show shadow  w-75 m-auto" role="alert">
+			@Html.Raw(alert)
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	</div>
+}
+
 <h4>Your receipt:</h4>
 
 	<p><strong>Registration number:</strong> @Model.RegistrationNumber</p>

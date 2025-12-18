@@ -233,7 +233,7 @@ namespace Garage_2.Controllers
             // Price calculated on every started hour
             decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour;
 
-            var receipt = new ReceiptViewModel
+            var receiptVM = new ReceiptViewModel
             {
                 RegistrationNumber = vehicle.RegistrationNumber,
                 Type = vehicle.Type,
@@ -246,7 +246,10 @@ namespace Garage_2.Controllers
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            return View("Receipt", receipt);
+            TempData["AlertType"] = "success";
+            TempData["AlertMessage"] = $"Vehicle with RegNo: <strong>{receiptVM.RegistrationNumber}</strong> has been checked out.";
+
+            return View("Receipt", receiptVM);
         }
 
         private bool ParkedVehicleExists(int id)
