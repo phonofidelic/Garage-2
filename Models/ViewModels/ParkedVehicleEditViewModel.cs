@@ -4,10 +4,16 @@ namespace Garage_2.Models.ViewModels
 {
     public class ParkedVehicleEditViewModel
     {
+        private string _registrationNumber = default!;
         public int Id { get; set; }
 
         [Required, StringLength(6, MinimumLength = 6)]
-        public string RegistrationNumber { get; set; } = default!;
+        [RegularExpression(@"^[A-Za-z0-9]{6}$", ErrorMessage = "Registration number must be exactly 6 alphanumeric characters (A-Z, 0-9).")]
+        public string RegistrationNumber
+        {
+            get => _registrationNumber;
+            set => _registrationNumber = value?.ToUpper() ?? default!;
+        }
 
         [Required, StringLength(100)]
         public string Make { get; set; } = default!;
