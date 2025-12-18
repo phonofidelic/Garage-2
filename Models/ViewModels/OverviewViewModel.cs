@@ -11,5 +11,7 @@
 
         public DateTime ArrivalTime { get; set; }
 
+        public TimeSpan ParkedTime { get; set; }
+
     }
 }
