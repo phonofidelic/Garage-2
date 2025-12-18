@@ -6,6 +6,14 @@
 
 <h1>Index</h1>
 
+@if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
+{
+    <div class="alert alert-@type alert-dismissible fade show" role="alert">
+        @alert
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <partial name="_SearchPartial" />
 
 <p>
