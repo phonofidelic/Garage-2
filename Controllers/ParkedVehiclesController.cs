@@ -94,6 +94,9 @@ namespace Garage_2.Controllers
 
                 _context.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
+
+                TempData["AlertType"] = "success";
+                TempData["AlertMessage"] = $"Vehicle with <strong>RegNum: {viewModel.RegistrationNumber}</strong> has been parked.";
                 return RedirectToAction(nameof(Index));
             }
 
