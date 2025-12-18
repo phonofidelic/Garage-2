@@ -9,13 +9,12 @@ namespace Garage_2.Models.ViewModels
 
         [Required, StringLength(6, MinimumLength = 6)]
         [RegularExpression(@"^[A-Za-z0-9]{6}$", ErrorMessage = "Registration number must be exactly 6 alphanumeric characters (A-Z, 0-9).")]
+        [Display(Name = "Registration number")]
         public string RegistrationNumber
         {
             get => _registrationNumber;
             set => _registrationNumber = value?.ToUpper() ?? default!;
         }
-        [Display(Name = "Registration number")]
-        public string RegistrationNumber { get; set; } = default!;
 
         [Required, StringLength(100)]
         public string Make { get; set; } = default!;
