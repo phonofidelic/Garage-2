@@ -7,53 +7,34 @@
 <h1>Details</h1>
 
 <div>
-    <h4>ParkedVehicle</h4>
+    <h4>Parked vehicle</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.RegistrationNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.RegistrationNumber)
+		<dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.RegistrationNumber)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.RegistrationNumber</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Make)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Make</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Model)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Model</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.NumberOfWheels)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.NumberOfWheels</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Color)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Color</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.ArrivalTime)</dt>
+        <dd class="col-sm-10">
+            @Model.Vehicle.ArrivalTime.ToString("yyyy-MM-dd HH:mm")
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.Make)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.Make)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.Model)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.Model)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.NumberOfWheels)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.NumberOfWheels)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.Color)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.Color)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.ArrivalTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.ArrivalTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle.Type)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.Type)
-        </dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Type)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Type</dd>
     </dl>
 </div>
+
 <div>
     <a class="btn btn-outline-secondary" asp-action="Index">Back to List</a>
     <a class="btn btn-primary" asp-action="EditVehicle" asp-route-id="@Model.Vehicle.Id">Edit</a>
