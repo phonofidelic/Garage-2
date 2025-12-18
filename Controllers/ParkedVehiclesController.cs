@@ -253,6 +253,11 @@ namespace Garage_2.Controllers
             return View("Receipt", receiptVM);
         }
 
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
         private bool ParkedVehicleExists(int id)
         {
             return _context.ParkedVehicle.Any(e => e.Id == id);
