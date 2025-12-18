@@ -37,7 +37,7 @@ namespace Garage_2.Controllers
             return View(await vehicles.Select(v => new OverviewViewModel
             {
                 Id = v.Id,
-                RegistrationNUmber = v.RegistrationNumber,
+                RegistrationNumber = v.RegistrationNumber,
                 Type = v.Type,
                 ArrivalTime = v.ArrivalTime,
                 ParkedTime = DateTime.Now - v.ArrivalTime
