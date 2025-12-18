@@ -98,7 +98,7 @@ namespace Garage_2.Controllers
                 _context.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
 
-                SetAlertInTempData(AlertType.success, $"Vehicle with <strong>RegNum: {viewModel.RegistrationNumber}</strong> has been parked.");
+                SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {viewModel.RegistrationNumber} has been parked.");
 
                 return RedirectToAction(nameof(Index));
             }
@@ -175,7 +175,7 @@ namespace Garage_2.Controllers
 
 
                     await _context.SaveChangesAsync();
-                    SetAlertInTempData(AlertType.success, $"Vehicle with <strong>RegNum: {parkedVehicle.RegistrationNumber}</strong> was updated successfully.");
+                    SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {parkedVehicle.RegistrationNumber} was updated successfully.");
                     return RedirectToAction(nameof(Index));
 
                 }
@@ -248,7 +248,7 @@ namespace Garage_2.Controllers
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            SetAlertInTempData(AlertType.success, $"Vehicle with RegNo: <strong>{receiptVM.RegistrationNumber}</strong> has been checked out.");
+            SetAlertInTempData(AlertType.success, $"Vehicle with RegNo: {receiptVM.RegistrationNumber} has been checked out.");
 
             return View("Receipt", receiptVM);
         }
