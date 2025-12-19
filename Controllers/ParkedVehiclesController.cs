@@ -25,6 +25,7 @@ namespace Garage_2.Controllers
         // GET: ParkedVehicles
         public async Task<IActionResult> Index([FromQuery] string? searchString, [FromQuery] OverviewSortBy? sortBy, int page = 1)
         {
+            // DoDo: Move to OverviewListItemViewModel
             // Store the search string in ViewData
             ViewData["CurrentFilter"] = searchString;
 
@@ -72,6 +73,7 @@ namespace Garage_2.Controllers
             int pageSize = 10;
             var totalPages = (int)Math.Ceiling((double)rowCount / pageSize);
 
+            // DoDo: Move to OverviewListItemViewModel
             ViewData["TotalPages"] = totalPages;
             ViewData["CurrentPage"] = page;
 
@@ -109,6 +111,7 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // DoDo: Move to OverviewListItemViewModel
             // Store the search string to pass back to Index
             ViewData["CurrentFilter"] = searchString;
 
