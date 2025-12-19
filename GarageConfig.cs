@@ -15,5 +15,9 @@ namespace Garage_2
         [Range(0.0, Double.PositiveInfinity, ErrorMessage = "The field {0} may not be negative.")]
         [Required]
         public decimal PricePerHour { get; set; } = -10.0m;
+
+        [Range(1, int.MaxValue, ErrorMessage = "The field {0} must be positive.")]
+        [Required]
+        public int GarageSize { get; set; }
     }
 }
