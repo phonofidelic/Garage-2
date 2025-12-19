@@ -25,10 +25,6 @@ namespace Garage_2.Controllers
         // GET: ParkedVehicles
         public async Task<IActionResult> Index([FromQuery] string? searchString, [FromQuery] OverviewSortBy? sortBy, int page = 1)
         {
-            // DoDo: Move to OverviewListItemViewModel
-            // Store the search string in ViewData
-            ViewData["CurrentFilter"] = searchString;
-
             // Start with all vehicles and apply smart search
             var query = _searchService.Search(_context.ParkedVehicle, searchString);
 
@@ -43,8 +39,6 @@ namespace Garage_2.Controllers
                     ArrivalTime = v.ArrivalTime,
                     ParkedTime = now - v.ArrivalTime
                 });
-
-            
 
             //  Apply sorting
             switch (sortBy)
@@ -73,10 +67,6 @@ namespace Garage_2.Controllers
             int pageSize = 10;
             var totalPages = (int)Math.Ceiling((double)rowCount / pageSize);
 
-            // DoDo: Move to OverviewListItemViewModel
-            ViewData["TotalPages"] = totalPages;
-            ViewData["CurrentPage"] = page;
-
             var currentRows = rows
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -87,7 +77,10 @@ namespace Garage_2.Controllers
             {
                 OverviewList = currentRows,
                 SortBy = sortBy,
-                Count = rowCount
+                Count = rowCount,
+                SearchString = searchString,
+                TotalPages = totalPages,
+                CurrentPage = page
             };
 
             // Return the view
@@ -111,7 +104,7 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // DoDo: Move to OverviewListItemViewModel
+            // DoDo: Move to DetailsViewModel?
             // Store the search string to pass back to Index
             ViewData["CurrentFilter"] = searchString;
 
