@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="~/Garage_2.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header class="px-3 position-fixed w-100 top-0 end-0 bg-white z-1">
+    <header class="px-3 position-fixed w-100 top-0 end-0 bg-white z-3">
         <nav class="container navbar navbar-expand-sm navbar-toggleable-sm navbar-light  border-bottom box-shadow no-print">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="ParkedVehicles" asp-action="Index">Garage 2.0</a>
@@ -32,9 +32,9 @@
 							   asp-action="GarageStatsOverview">Garage Statistics</a>
                         </li>
 
-                        <li class="nav-item ms-auto">
+                        <li class="nav-item ms-0 ms-sm-auto">
                             <a class="nav-link text-dark"
-                               asp-controller="Home"
+                               asp-controller="ParkedVehicles"
                                asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
