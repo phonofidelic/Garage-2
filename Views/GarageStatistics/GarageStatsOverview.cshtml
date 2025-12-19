@@ -1,0 +1,35 @@
+﻿@model GarageStatisticsViewModel
+
+
+@{
+    ViewData["Title"] = "Garage Statistics";
+}
+
+<h1>Garage Statistics</h1>
+
+<div>
+    
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.TotalVehicles)</dt>
+        <dd class="col-sm-10">@Model.TotalVehicles</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.TotalWheels)</dt>
+        <dd class="col-sm-10">@Model.TotalWheels</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.TotalRevenue)</dt>
+        <dd class="col-sm-10">@Model.TotalRevenue</dd>
+
+        @if (Model.VehiclesPerType != null)
+        {
+            <dt class="col-sm-2 fs-5">@Html.DisplayNameFor(m => m.VehiclesPerType)</dt>
+            <dd class="col-sm-10"></dd>
+            @foreach (VehicleTypeCountViewModel vehicleTypeCount in Model.VehiclesPerType)
+            {
+                <dt class="col-sm-2">@vehicleTypeCount.Type:</dt>
+                <dd class="col-sm-10">@vehicleTypeCount.Count</dd>
+            }
+        }
+        
+    </dl>
+</div>

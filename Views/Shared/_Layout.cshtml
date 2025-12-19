@@ -19,12 +19,23 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1 justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ParkedVehicles" asp-action="Index">Parked Vehicles</a>
+                            <a class="nav-link text-dark"
+                               asp-controller="ParkedVehicles"
+							   asp-action="Index">Parked Vehicles</a>
+                        </li>  
+
+                        <li class="nav-item">
+							<a class="nav-link text-dark"
+                               asp-controller="GarageStatistics"
+							   asp-action="GarageStatsOverview">Garage Statistics</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ParkedVehicles" asp-action="Privacy">Privacy</a>
+
+                        <li class="nav-item ms-auto">
+                            <a class="nav-link text-dark"
+                               asp-controller="Home"
+                               asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                 </div>
