@@ -13,14 +13,6 @@ namespace Garage_2.Models.ViewModels
         public int Count { get; set; }
     }
 
-    public enum OverviewSortBy
-    {
-        RegistrationNumber,
-        ArrivalTime,
-        Type,
-        ParkedTime
-    }
-
     public class OverviewListItemViewModel
     {
         public int Id { get; set; }
