@@ -1,9 +1,11 @@
 ﻿using Garage_2.Data;
+using Garage_2.Interfaces;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Garage_2.Controllers
 {
@@ -11,11 +13,13 @@ namespace Garage_2.Controllers
     {
         private readonly GarageContext _context;
         private readonly GarageConfig _config;
+        private readonly IVehicleSearchService _searchService;
 
-        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config)
+        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config, IVehicleSearchService searchService)
         {
             _context = context;
             _config = config.Value;
+            _searchService = searchService;
         }
 
         // GET: ParkedVehicles
@@ -24,28 +28,28 @@ namespace Garage_2.Controllers
             // Store the search string in ViewData
             ViewData["CurrentFilter"] = searchString;
 
-            // Start with all vehicles from the database
-            var vehicles = from v in _context.ParkedVehicle select v;
-
-            // Filter vehicles by registration number if a search string is provided
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                vehicles = vehicles.Where(v => v.RegistrationNumber.Contains(searchString));
-            }
+            // Start with all vehicles and apply smart search
+            var query = _searchService.Search(_context.ParkedVehicle, searchString);
 
             // Execute the query, put the data into overviewmodel and return view
-            return View(await vehicles.Select(v => new OverviewViewModel
-            {
-                Id = v.Id,
-                RegistrationNumber = v.RegistrationNumber,
-                Type = v.Type,
-                ArrivalTime = v.ArrivalTime,
-                ParkedTime = DateTime.Now - v.ArrivalTime
-            }).ToListAsync());
+            var now = DateTime.Now;
+            var rows = await query
+                .Select(v => new OverviewViewModel
+                {
+                    Id = v.Id,
+                    RegistrationNumber = v.RegistrationNumber,
+                    Type = v.Type,
+                    ArrivalTime = v.ArrivalTime
+                })
+                .ToListAsync();
+
+            rows.ForEach(r => r.ParkedTime = now - r.ArrivalTime);
+
+            return View(rows);
         }
 
         // GET: ParkedVehicles/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? searchString)
         {
             if (id == null)
             {
@@ -60,6 +64,9 @@ namespace Garage_2.Controllers
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
+
+            // Store the search string to pass back to Index
+            ViewData["CurrentFilter"] = searchString;
 
             return View(new DetailsViewModel(parkedVehicle));
         }
