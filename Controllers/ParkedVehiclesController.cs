@@ -253,6 +253,29 @@ namespace Garage_2.Controllers
             return View("Receipt", receiptVM);
         }
 
+        private decimal GetVehicleSizeOccupied(VehicleType type)
+        {
+            decimal vehicleSize;
+
+            switch (type)
+            {
+                case VehicleType.Boat:
+                    vehicleSize = 3.0m;
+                    break;
+
+                // A motorcycle takes 1/3rd space.
+                case VehicleType.Motorcycle:
+                    vehicleSize = 1.0m / 3.0m;
+                    break;
+
+                default:
+                    vehicleSize = 1.0m;
+                    break;
+            }
+
+            return vehicleSize;
+        }
+
         public IActionResult Privacy()
         {
             return View();
