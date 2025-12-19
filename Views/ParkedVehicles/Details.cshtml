@@ -36,6 +36,6 @@
 </div>
 
 <div>
-    <a class="btn btn-outline-secondary" asp-action="Index">Back to List</a>
+    <a class="btn btn-outline-secondary" asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]">Back to List</a>
     <a class="btn btn-primary" asp-action="EditVehicle" asp-route-id="@Model.Vehicle.Id">Edit</a>
 </div>
