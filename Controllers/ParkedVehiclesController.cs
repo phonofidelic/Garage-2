@@ -23,7 +23,7 @@ namespace Garage_2.Controllers
         }
 
         // GET: ParkedVehicles
-        public async Task<IActionResult> Index(string? searchString)
+        public async Task<IActionResult> Index(string? searchString, int page = 1)
         {
             // Store the search string in ViewData
             ViewData["CurrentFilter"] = searchString;
@@ -45,7 +45,18 @@ namespace Garage_2.Controllers
 
             rows.ForEach(r => r.ParkedTime = now - r.ArrivalTime);
 
-            return View(rows);
+            int pageSize = 10;
+            var totalPages = (int)Math.Ceiling((double)rows.Count / pageSize);
+
+            ViewData["TotalPages"] = totalPages;
+            ViewData["CurrentPage"] = page;
+
+            var currentRows = rows
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+            return View(currentRows);
         }
 
         // GET: ParkedVehicles/Details/5
