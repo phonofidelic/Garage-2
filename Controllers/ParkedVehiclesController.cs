@@ -23,7 +23,10 @@ namespace Garage_2.Controllers
         }
 
         // GET: ParkedVehicles
-        public async Task<IActionResult> Index([FromQuery] string? searchString, [FromQuery] OverviewSortBy? sortBy, int page = 1)
+        public async Task<IActionResult> Index(
+            [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy, 
+            [FromQuery(Name = "searchString")] string? searchString, 
+            [FromQuery(Name = "page")] int page = 1)
         {
             // Start with all vehicles and apply smart search
             var query = _searchService.Search(_context.ParkedVehicle, searchString);

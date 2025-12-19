@@ -35,7 +35,12 @@
            style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles" asp-action="Index" asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)">
+                <a 
+                    asp-controller="ParkedVehicles" 
+                    asp-action="Index"
+                    asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)"
+                    asp-route-searchString="@Model.SearchString"
+                    asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.RegistrationNumber)
                 </a>
                 <span style="width: 8px">
@@ -46,7 +51,12 @@
                 </span>
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles" asp-action="Index" asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)">
+                <a 
+                    asp-controller="ParkedVehicles" 
+                    asp-action="Index" 
+                    asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
+                    asp-route-searchString="@Model.SearchString"
+                    asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.ArrivalTime)
                 </a>
                 <span style="width: 8px">
@@ -57,7 +67,11 @@
                 </span>
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles" asp-action="Index" asp-route-sortBy="@nameof(Model.OverviewItem.Type)">
+                <a asp-controller="ParkedVehicles"
+                   asp-action="Index"
+                   asp-route-sortBy="@nameof(Model.OverviewItem.Type)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.Type)
                 </a>
                 <span style="width: 8px">
@@ -68,7 +82,11 @@
                 </span>
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles" asp-action="Index" asp-route-sortBy="@nameof(Model.OverviewItem.ParkedTime)">
+                <a asp-controller="ParkedVehicles"
+                   asp-action="Index"
+                   asp-route-sortBy="@nameof(Model.OverviewItem.ParkedTime)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.ParkedTime)
                 </a>
                 <span style="width: 8px">
@@ -113,8 +131,9 @@
     @for (int i = 1; i <= Model.TotalPages; i++)
     {
         <a asp-action="Index"
-           asp-route-page="@i"
+           asp-route-sortBy="@Model.SortBy"
            asp-route-searchString="@Model.SearchString"
+           asp-route-page="@i"
            class="btn btn-sm @(i == Model.CurrentPage ? "btn-primary" : "btn-outline-primary")">
             @i
         </a>
