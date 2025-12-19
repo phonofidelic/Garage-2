@@ -68,9 +68,9 @@ namespace Garage_2.Controllers
                     break;
             }
 
-            double rowCount = rows.Count();
+            int rowCount = rows.Count();
             int pageSize = 10;
-            var totalPages = (int)Math.Ceiling(rowCount / pageSize);
+            var totalPages = (int)Math.Ceiling((double)rowCount / pageSize);
 
             ViewData["TotalPages"] = totalPages;
             ViewData["CurrentPage"] = page;
@@ -84,7 +84,8 @@ namespace Garage_2.Controllers
             OverviewViewModel viewModel = new()
             {
                 OverviewList = currentRows,
-                SortBy = sortBy
+                SortBy = sortBy,
+                Count = rowCount
             };
 
             // Return the view

@@ -9,6 +9,8 @@ namespace Garage_2.Models.ViewModels
         public IEnumerable<OverviewListItemViewModel> OverviewList { get; set; } = default!;
 
         public OverviewSortBy? SortBy { get; set; }
+
+        public int Count { get; set; }
     }
 
     public enum OverviewSortBy
