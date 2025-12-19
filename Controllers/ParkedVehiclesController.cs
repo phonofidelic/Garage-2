@@ -23,7 +23,7 @@ namespace Garage_2.Controllers
         }
 
         // GET: ParkedVehicles
-        public async Task<IActionResult> Index(string? searchString, int page = 1)
+        public async Task<IActionResult> Index([FromQuery] string? searchString, [FromQuery] OverviewSortBy? sortBy, int page = 1)
         {
             // Store the search string in ViewData
             ViewData["CurrentFilter"] = searchString;
@@ -33,20 +33,44 @@ namespace Garage_2.Controllers
 
             // Execute the query, put the data into overviewmodel and return view
             var now = DateTime.Now;
-            var rows = await query
-                .Select(v => new OverviewViewModel
+            IEnumerable<OverviewListItemViewModel> rows = query
+                .Select(v => new OverviewListItemViewModel
                 {
                     Id = v.Id,
                     RegistrationNumber = v.RegistrationNumber,
                     Type = v.Type,
-                    ArrivalTime = v.ArrivalTime
-                })
-                .ToListAsync();
+                    ArrivalTime = v.ArrivalTime,
+                    ParkedTime = now - v.ArrivalTime
+                });
 
-            rows.ForEach(r => r.ParkedTime = now - r.ArrivalTime);
+            
 
+            //  Apply sorting
+            switch (sortBy)
+            {
+                case OverviewSortBy.RegistrationNumber:
+                    rows = rows.OrderBy(v => v.RegistrationNumber);
+                    break;
+
+                case OverviewSortBy.ArrivalTime:
+                    rows = rows.OrderBy(v => v.ArrivalTime);
+                    break;
+
+                case OverviewSortBy.Type:
+                    rows = rows.OrderBy(v => v.Type);
+                    break;
+
+                case OverviewSortBy.ParkedTime:
+                    rows = rows.OrderByDescending(v => v.ArrivalTime);
+                    break;
+
+                default:
+                    break;
+            }
+
+            double rowCount = rows.Count();
             int pageSize = 10;
-            var totalPages = (int)Math.Ceiling((double)rows.Count / pageSize);
+            var totalPages = (int)Math.Ceiling(rowCount / pageSize);
 
             ViewData["TotalPages"] = totalPages;
             ViewData["CurrentPage"] = page;
@@ -56,7 +80,15 @@ namespace Garage_2.Controllers
             .Take(pageSize)
             .ToList();
 
-            return View(currentRows);
+            // Build the ViewModdel
+            OverviewViewModel viewModel = new()
+            {
+                OverviewList = currentRows,
+                SortBy = sortBy
+            };
+
+            // Return the view
+            return View(viewModel);
         }
 
         // GET: ParkedVehicles/Details/5

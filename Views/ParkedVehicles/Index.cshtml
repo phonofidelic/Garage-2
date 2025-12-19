@@ -1,7 +1,25 @@
-﻿@model IEnumerable<Garage_2.Models.ViewModels.OverviewViewModel>
+﻿@model Garage_2.Models.ViewModels.OverviewViewModel
 
 @{
     ViewData["Title"] = "Index";
+    var sortByRegistrationNumber = new Dictionary<string, string>
+    {
+        {"sortBy", nameof(Model.OverviewItem.RegistrationNumber) }
+    };
+    var sortByArrivalTime = new Dictionary<string, string>
+    {
+        {"sortBy", nameof(Model.OverviewItem.ArrivalTime) }
+    };
+    var sortByType = new Dictionary<string, string>
+    {
+        {"sortBy", nameof(Model.OverviewItem.Type) }
+    };
+    var sortByParkedTime = new Dictionary<string, string>
+    {
+        {"sortBy", nameof(Model.OverviewItem.ParkedTime) }
+    };
+
+    
 }
 
 @if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
@@ -35,22 +53,54 @@
            style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
             <th td class="text-nowrap">
-                @Html.DisplayNameFor(model => model.RegistrationNumber)
+                <a asp-controller="ParkedVehicles" asp-action="Index" asp-all-route-data="sortByRegistrationNumber">
+                    @Html.DisplayNameFor(model => model.OverviewItem.RegistrationNumber)
+                </a>
+                <span style="width: 8px">
+                    @if (Model.SortBy == OverviewSortBy.RegistrationNumber)
+                    {
+                        <span class="text-primary">🢑</span>
+                    }
+                </span>
             </th>
             <th td class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ArrivalTime)
+                <a asp-controller="ParkedVehicles" asp-action="Index" asp-all-route-data="sortByArrivalTime">
+                    @Html.DisplayNameFor(model => model.OverviewItem.ArrivalTime)
+                </a>
+                <span style="width: 8px">
+                    @if (Model.SortBy == OverviewSortBy.ArrivalTime)
+                    {
+                        <span class="text-primary">🢑</span>
+                    }
+                </span>
             </th>
             <th td class="text-nowrap">
-                @Html.DisplayNameFor(model => model.Type)
+                <a asp-controller="ParkedVehicles" asp-action="Index" asp-all-route-data="sortByType">
+                    @Html.DisplayNameFor(model => model.OverviewItem.Type)
+                </a>
+                <span style="width: 8px">
+                    @if (Model.SortBy == OverviewSortBy.Type)
+                    {
+                        <span class="text-primary">🢑</span>
+                    }
+                </span>
             </th>
             <th td class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ParkedTime)
+                <a asp-controller="ParkedVehicles" asp-action="Index" asp-all-route-data="sortByParkedTime">
+                    @Html.DisplayNameFor(model => model.OverviewItem.ParkedTime)
+                </a>
+                <span style="width: 8px">
+                    @if (Model.SortBy == OverviewSortBy.ParkedTime)
+                    {
+                        <span class="text-primary">🢑</span>
+                    }
+                </span>
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.OverviewList) {
         <tr>
             <td class="text-nowrap">
                 @Html.DisplayFor(modelItem => item.RegistrationNumber)
