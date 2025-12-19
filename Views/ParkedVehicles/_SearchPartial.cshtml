@@ -1,6 +1,8 @@
+@model Garage_2.Models.ViewModels.OverviewViewModel
+
 <form asp-action="Index" method="get">
     <div class="d-flex gap-2 justify-content-end align-items-center">
-        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+        <input type="text" name="searchString" value="@Model.SearchString"
                class="form-control" style="max-width: 250px;"
                placeholder="Search vehicles..."
                title="Search by text (reg.nr, make, model, color) or use commands: w(4)=wheels, t(car)=type, d(2024-12-19)=date"
