@@ -11,7 +11,7 @@ namespace Garage_2.Models.ViewModels
         [DisplayName("Total revenue")]
         public decimal TotalRevenue { get; set; }
 
-        [DisplayName("Vehicles per type")]
+        [DisplayName("Vehicle types")]
         public List<VehicleTypeCountViewModel>? VehiclesPerType { get; set; }
     }
 
