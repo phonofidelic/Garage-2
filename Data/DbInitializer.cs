@@ -209,14 +209,14 @@ namespace Garage_2.Data
         }
 
 
-        // Seed-data – Lista av p-platser (ParkingSpot) 1-30 (hårdkodat) med initial kapacitet 3, dvs tomma parkeringsplatser
+        // Seed-data – Lista av p-platser (ParkingSpot) 1-50 (hårdkodat) med initial kapacitet 3, dvs tomma parkeringsplatser
         private static List<ParkingSpot> ParkingSpotsList()
         {
             var spots = new List<ParkingSpot>();
 
             // Obs! Hårdkodat antal p-platser i garaget här.
             // TODO: Borde fixas, hämtas från config istället (?)
-            const int totalSpots = 30;
+            const int totalSpots = 50;
 
             for (int i = 1; i <= totalSpots; i++)
             {

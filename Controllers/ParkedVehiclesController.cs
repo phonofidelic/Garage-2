@@ -122,8 +122,6 @@ namespace Garage_2.Controllers
         }
 
         // POST: ParkedVehicles/ParkNewVehicle
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkNewVehicleViewModel viewModel)
@@ -195,8 +193,6 @@ namespace Garage_2.Controllers
         }
 
         // POST: ParkedVehicles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditVehicle(int id, ParkedVehicleEditViewModel vm)
@@ -253,22 +249,6 @@ namespace Garage_2.Controllers
         // GET: ParkedVehicles/Delete/5
         public async Task<IActionResult> UnparkVehicle(int? id)
         {
-            //if (id == null)
-            //{
-            //    SetAlertInTempData(AlertType.warning, "Vehicle not found.");
-            //    return RedirectToAction(nameof(Index));
-            //}
-
-            //var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
-
-            //if (parkedVehicle == null)
-            //{
-            //    SetAlertInTempData(AlertType.warning, "Vehicle not found.");
-            //    return RedirectToAction(nameof(Index));
-            //}
-
-            //return View(parkedVehicle);
-
             if (id == null)
             {
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
