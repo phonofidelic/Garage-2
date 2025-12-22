@@ -348,13 +348,30 @@ namespace Garage_2.Controllers
         // GET: ParkedVehicles/Delete/5
         public async Task<IActionResult> UnparkVehicle(int? id)
         {
+            //if (id == null)
+            //{
+            //    SetAlertInTempData(AlertType.warning, "Vehicle not found.");
+            //    return RedirectToAction(nameof(Index));
+            //}
+
+            //var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+
+            //if (parkedVehicle == null)
+            //{
+            //    SetAlertInTempData(AlertType.warning, "Vehicle not found.");
+            //    return RedirectToAction(nameof(Index));
+            //}
+
+            //return View(parkedVehicle);
+
             if (id == null)
             {
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
 
-            var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+            // Hämta fordonet till vyn, inkludera join-tabell med relationerna till p-plaser, samt p-platserna själva
+            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
