@@ -19,10 +19,14 @@
 
 	<hr />
 
+	<p>
+		<strong>Parking spot(s):</strong>
+		@string.Join(", ", Model.ParkingSpots)
+	</p>
 	<p><strong>Arrival time:</strong> @Model.ArrivalTime</p>
 	<p><strong>Checkout time:</strong> @Model.CheckoutTime</p>
 	<p><strong>Parking duration:</strong> @($"{(int)Model.ParkingDuration.TotalHours} h {Model.ParkingDuration.Minutes} min")</p>
-
+	
 
 	<hr />
 

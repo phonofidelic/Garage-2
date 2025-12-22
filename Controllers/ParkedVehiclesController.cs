@@ -272,7 +272,10 @@ namespace Garage_2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnparkConfirmed(int id)
         {
-            var vehicle = await _context.ParkedVehicle.FindAsync(id);
+            //var vehicle = await _context.ParkedVehicle.FindAsync(id);
+
+            // Hämta vehicle med tillhörande ParkingSpot(s) i nav-property, via join-table:n VehicleSpots
+            var vehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
             { //return NotFound();
@@ -283,9 +286,7 @@ namespace Garage_2.Controllers
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
 
-            int unitsUsed = _context.VehicleSpots
-            .Where(v => v.ParkedVehicleId == id)
-            .Sum(v => v.UnitsUsed);
+            int unitsUsed = _context.VehicleSpots.Where(v => v.ParkedVehicleId == id).Sum(v => v.UnitsUsed);
 
             decimal sizeMultiplier = (decimal)unitsUsed / 3;
 
@@ -299,10 +300,12 @@ namespace Garage_2.Controllers
                 ArrivalTime = vehicle.ArrivalTime,
                 CheckoutTime = checkoutTime,
                 ParkingDuration = totalParkingTime,
-                Price = totalPrice
+                Price = totalPrice,
+                ParkingSpots = vehicle.VehicleSpots.Select(vs => vs.ParkingSpot.SpotNumber).ToList()
             };
 
             // Todo: try-catch här
+            // Pga cascade delete i GarageContext tas även tillhörande rader bort ur join-table:n VehicleSpot, vilket också frigör platserna i ParkingSpots 
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
