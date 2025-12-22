@@ -33,6 +33,22 @@ namespace Garage_2.Controllers
                 vehiclesPerTypeList.Add(new VehicleTypeCountViewModel() { Count = vehicleType.Count, Type = vehicleType.Type });
             }
 
+            DateTime now = DateTime.Now;
+            var arrivalTimes = _context.ParkedVehicle.Select(v => v.ArrivalTime).ToList();
+
+            double totalHours = 0;
+
+            foreach (var arrival in arrivalTimes)
+            {
+                TimeSpan duration = now - arrival;
+                totalHours += duration.TotalHours;
+            }
+
+            decimal totalRevenue = (decimal)totalHours * _config.PricePerHour;
+
+            // Round to closest int because otherwise too long
+            totalRevenue = Math.Round(totalRevenue);
+
             GarageStatisticsViewModel GarageStatsVM = new GarageStatisticsViewModel
             {
                 TotalRevenue = 1000000,
