@@ -5,7 +5,6 @@ using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Garage_2.Controllers
 {
@@ -14,12 +13,14 @@ namespace Garage_2.Controllers
         private readonly GarageContext _context;
         private readonly GarageConfig _config;
         private readonly IVehicleSearchService _searchService;
+        private readonly IParkingService _parkingService;
 
-        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config, IVehicleSearchService searchService)
+        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config, IVehicleSearchService searchService, IParkingService parkingService)
         {
             _context = context;
             _config = config.Value;
             _searchService = searchService;
+            _parkingService = parkingService;
         }
 
         // GET: ParkedVehicles
@@ -134,8 +135,6 @@ namespace Garage_2.Controllers
         }
 
         // POST: ParkedVehicles/ParkNewVehicle
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkNewVehicleViewModel viewModel)
@@ -158,11 +157,15 @@ namespace Garage_2.Controllers
                     Type = viewModel.Type
                 };
 
-                _context.Add(parkedVehicle);
-                await _context.SaveChangesAsync();
+                var result = await _parkingService.ParkVehicleAsync(parkedVehicle);
+
+                if (!result.Success)
+                {
+                    SetAlertInTempData(AlertType.warning, result.ErrorMessage!);
+                    return RedirectToAction(nameof(Index));
+                }
 
                 SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {viewModel.RegistrationNumber} has been parked.");
-
                 return RedirectToAction(nameof(Index));
             }
 
@@ -203,8 +206,6 @@ namespace Garage_2.Controllers
         }
 
         // POST: ParkedVehicles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditVehicle(int id, ParkedVehicleEditViewModel vm)
@@ -267,7 +268,8 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+            // Hämta fordonet till vyn, inkludera join-tabell med relationerna till p-plaser, samt p-platserna själva
+            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
@@ -283,7 +285,10 @@ namespace Garage_2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnparkConfirmed(int id)
         {
-            var vehicle = await _context.ParkedVehicle.FindAsync(id);
+            //var vehicle = await _context.ParkedVehicle.FindAsync(id);
+
+            // Hämta vehicle med tillhörande ParkingSpot(s) i nav-property, via join-table:n VehicleSpots
+            var vehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
             { //return NotFound();
@@ -294,8 +299,12 @@ namespace Garage_2.Controllers
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
 
-            // Price calculated on every started hour
-            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour;
+            int unitsUsed = _context.VehicleSpots.Where(v => v.ParkedVehicleId == id).Sum(v => v.UnitsUsed);
+
+            decimal sizeMultiplier = (decimal)unitsUsed / 3;
+
+            // Calculate Price 
+            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour * sizeMultiplier;
 
             var receiptVM = new ReceiptViewModel
             {
@@ -304,10 +313,12 @@ namespace Garage_2.Controllers
                 ArrivalTime = vehicle.ArrivalTime,
                 CheckoutTime = checkoutTime,
                 ParkingDuration = totalParkingTime,
-                Price = totalPrice
+                Price = totalPrice,
+                ParkingSpots = vehicle.VehicleSpots.Select(vs => vs.ParkingSpot.SpotNumber).ToList()
             };
 
             // Todo: try-catch här
+            // Pga cascade delete i GarageContext tas även tillhörande rader bort ur join-table:n VehicleSpot, vilket också frigör platserna i ParkingSpots 
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 

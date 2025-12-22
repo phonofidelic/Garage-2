@@ -17,5 +17,7 @@ namespace Garage_2.Models.ViewModels
         public TimeSpan ParkingDuration { get; set; }
 
         public decimal Price { get; set; }
+
+        public List<int> ParkingSpots { get; set; } = new();
     }
 }
