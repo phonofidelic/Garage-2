@@ -3,6 +3,7 @@ using Garage_2.Interfaces;
 using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Controllers
 {
@@ -33,9 +34,34 @@ namespace Garage_2.Controllers
                 vehiclesPerTypeList.Add(new VehicleTypeCountViewModel() { Count = vehicleType.Count, Type = vehicleType.Type });
             }
 
+            DateTime now = DateTime.Now;
+
+            // Pull only the time and units for each vehicle
+            var vehicleDataList = _context.ParkedVehicle.Select(v => new
+            {
+                v.ArrivalTime,
+                Units = v.VehicleSpots.Sum(s => s.UnitsUsed)
+            }).ToList();
+
+            decimal totalRevenue = 0;
+
+            foreach (var item in vehicleDataList)
+            {
+                TimeSpan duration = now - item.ArrivalTime;
+
+                double hours = duration.TotalHours;
+
+                // Size Multiplier (3 units = 1 spot)
+                double sizeMultiplier = item.Units / 3.0;
+
+                totalRevenue += (decimal)(hours * (double)_config.PricePerHour * sizeMultiplier);
+            }
+
+            totalRevenue = Math.Round(totalRevenue);
+
             GarageStatisticsViewModel GarageStatsVM = new GarageStatisticsViewModel
             {
-                TotalRevenue = 1000000,
+                TotalRevenue = totalRevenue,
                 TotalVehicles = totalVehicles,
                 TotalWheels = totalWheels,
                 VehiclesPerType = vehiclesPerTypeList

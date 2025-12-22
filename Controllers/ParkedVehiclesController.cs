@@ -283,8 +283,14 @@ namespace Garage_2.Controllers
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
 
-            // Price calculated on every started hour
-            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour;
+            int unitsUsed = _context.VehicleSpots
+            .Where(v => v.ParkedVehicleId == id)
+            .Sum(v => v.UnitsUsed);
+
+            decimal sizeMultiplier = (decimal)unitsUsed / 3;
+
+            // Calculate Price 
+            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour * sizeMultiplier;
 
             var receiptVM = new ReceiptViewModel
             {
