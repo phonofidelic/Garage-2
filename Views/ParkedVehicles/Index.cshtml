@@ -3,9 +3,6 @@
 @{
     ViewData["Title"] = "Index";
 
-    // ToDo: Get capacity from GarageConfig and set in OverviewViewModel
-    ViewData["CurrentCapacity"] = 50 - Model.Count;
-
     OverviewSortOrder GetSortOrder(OverviewSortBy sortBy)
     {
         if (Model.SortBy == sortBy)
@@ -42,22 +39,13 @@
     class="position-fixed bg-body start-0 end-0 z-1"
     style="top: 48px; @@media (min-width: 768px) { top: 57px }">
     <div class="container d-flex p-3 px-4 gap-2">
-        <div class="">
-            @*ToDo: Get capacity form GarageConfig*@
-            @if (Model.Count < 50)
-            {
-                <a asp-action="ParkNewVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Park
-                    <span class="d-none d-sm-inline">new vehicle</span>
-                </a>
-            } else
-            {
-                <button class="btn btn-primary" disabled>Park <span class="d-none d-sm-inline">new vehicle</span></button>
-            }
+        <div>
+            <a asp-action="ParkNewVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Park
+                <span class="d-none d-sm-inline">new vehicle</span>
+            </a>
         </div>
-        <div class="d-flex flex-nowrap align-items-center gap-1">
-            @*ToDo: Get capacity form GarageConfig*@
-            <span class="text-nowrap m-0">@ViewData["CurrentCapacity"]/50</span>
-            <span class="d-none d-sm-inline text-nowrap">spaces available</span>
+        <div class="d-none d-sm-flex text-nowrap align-items-center gap-1">
+            Parked vehicles: @Model.Count
         </div>
         <div class="d-flex flex-grow-1 justify-content-end">
             <partial name="_SearchPartial" />
