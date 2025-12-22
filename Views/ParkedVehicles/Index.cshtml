@@ -29,14 +29,14 @@
     </div>
 </div>
 
-<table class="table" style="margin-top: 108px">
+<table class="table table-striped" style="margin-top: 108px">
     <thead
         class="position-sticky w-100 bg-body p-3 h-100 mt-0 z-2"
            style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
             <th td class="text-nowrap">
-                <a 
-                    asp-controller="ParkedVehicles" 
+                <a
+                    asp-controller="ParkedVehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)"
                     asp-route-searchString="@Model.SearchString"
@@ -51,9 +51,9 @@
                 </span>
             </th>
             <th td class="text-nowrap">
-                <a 
-                    asp-controller="ParkedVehicles" 
-                    asp-action="Index" 
+                <a
+                    asp-controller="ParkedVehicles"
+                    asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
                     asp-route-searchString="@Model.SearchString"
                     asp-route-page="@Model.CurrentPage">
@@ -138,4 +138,25 @@
             @i
         </a>
     }
+</div>
+
+<div class="modal fade" id="searchHelpModal" tabindex="-1" aria-labelledby="searchHelpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchHelpModalLabel">Search Help</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Text Search:</strong> Search by registration number, make, model, or color.</p>
+                <hr />
+                <p><strong>Search by commands:</strong></p>
+                <ul class="list-unstyled">
+                    <li><code>w(4)</code> – Filter by number of wheels</li>
+                    <li><code>t(car)</code> – Filter by vehicle type</li>
+                    <li><code>d(2025-12-19)</code> – Filter by arrival time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>

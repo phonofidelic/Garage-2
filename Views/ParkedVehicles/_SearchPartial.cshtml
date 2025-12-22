@@ -5,9 +5,14 @@
         <input type="hidden" name="sortBy" value="@Model.SortBy" />
         <input type="text" name="searchString" value="@Model.SearchString"
                class="form-control" style="max-width: 250px;"
-               placeholder="Search vehicles..."
-               title="Search by text (reg.nr, make, model, color) or use commands: w(4)=wheels, t(car)=type, d(2024-12-19)=date"
-               data-bs-toggle="tooltip" />
+               placeholder="Search vehicles..." />
+
+        <button type="button" class="btn btn-outline-info btn-sm"
+                data-bs-toggle="modal" data-bs-target="#searchHelpModal"
+                title="Search help">
+            ?
+        </button>
+
         @if (Model.SearchString != null)
         {
             <a asp-action="Index" class="btn btn-outline-danger">Clear</a>
@@ -15,10 +20,3 @@
         <button type="submit" class="btn btn-secondary">Search</button>
     </div>
 </form>
-
-@section Scripts {
-    <script>
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
-    </script>
-}
