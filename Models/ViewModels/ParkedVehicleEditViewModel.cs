@@ -16,17 +16,20 @@ namespace Garage_2.Models.ViewModels
             set => _registrationNumber = value?.ToUpper() ?? default!;
         }
 
-        [Required, StringLength(100)]
+        [Required, StringLength(50)]
+        [RegularExpression(@"^[\w\-\.\s]+$", ErrorMessage = "Make may only contain alphanumeric characters, spaces, \"-\" and \".\"")]
         public string Make { get; set; } = default!;
 
-        [Required, StringLength(100)]
+        [Required, StringLength(50)]
+        [RegularExpression(@"^[\w\-\.\s]+$", ErrorMessage = "Model may only contain alphanumeric characters, spaces, \"-\" and \".\"")]
         public string Model { get; set; } = default!;
 
         [Required, Range(0, 22)]
         [Display(Name = "Number of wheels")]
         public int NumberOfWheels { get; set; }
 
-        [Required, StringLength(100)]
+        [Required, StringLength(25)]
+        [RegularExpression(@"^[\w\s]+$", ErrorMessage = "Make may only contain alphanumeric characters and spaces.")]
         public string Color { get; set; } = default!;
 
         // Visible in edit view, but can not be changed.
