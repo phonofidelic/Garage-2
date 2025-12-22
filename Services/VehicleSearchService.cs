@@ -53,17 +53,11 @@ public partial class VehicleSearchService : IVehicleSearchService
                 return (IQueryable<T>)vehicleQuery!.Where(v => matchingTypes.Contains(v.Type));
             }
 
-            // Default: search across text fields and vehicle type
-            var matchingTypesDefault = Enum.GetValues<VehicleType>()
-                .Where(t => t.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
             var filtered = vehicleQuery!.Where(v =>
                 v.RegistrationNumber.Contains(search) ||
                 v.Make.Contains(search) ||
                 v.Model.Contains(search) ||
-                v.Color.Contains(search) ||
-                matchingTypesDefault.Contains(v.Type)
+                v.Color.Contains(search)
             );
 
             return (IQueryable<T>)filtered;
