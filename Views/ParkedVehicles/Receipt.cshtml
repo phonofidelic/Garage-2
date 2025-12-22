@@ -4,7 +4,7 @@
 
 @if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
 {
-	<div class="position-fixed w-100 bottom-0 start-0 mb-3">
+	<div class="position-fixed w-100 bottom-0 start-0 mb-3 no-print">
 		<div class="alert alert-@type alert-dismissible fade show shadow  w-75 m-auto" role="alert">
 			@Html.Raw(alert)
 			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -30,7 +30,7 @@
 
 	<hr />
 
-<h4>Total price: @Model.Price.ToString("0.00") SEK</h4>
+<h4>Total price: @($"{Model.Price:N1} SEK")</h4>
 
 <a class="btn btn-outline-secondary no-print" asp-action="Index">Back to List</a>
 <button onclick="window.print()" class="btn btn-success no-print">Print receipt</button>

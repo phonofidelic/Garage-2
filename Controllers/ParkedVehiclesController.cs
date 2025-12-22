@@ -25,9 +25,9 @@ namespace Garage_2.Controllers
 
         // GET: ParkedVehicles
         public async Task<IActionResult> Index(
-            [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy, 
-            [FromQuery(Name = "order")] OverviewSortOrder? order, 
-            [FromQuery(Name = "searchString")] string? searchString, 
+            [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy,
+            [FromQuery(Name = "order")] OverviewSortOrder? order,
+            [FromQuery(Name = "searchString")] string? searchString,
             [FromQuery(Name = "page")] int page = 1)
         {
             // Start with all vehicles and apply smart search
@@ -49,27 +49,27 @@ namespace Garage_2.Controllers
             switch (sortBy)
             {
                 case OverviewSortBy.RegistrationNumber:
-                    rows = order == OverviewSortOrder.Ascending ? 
+                    rows = order == OverviewSortOrder.Ascending ?
                         rows.OrderBy(v => v.RegistrationNumber) :
                         rows.OrderByDescending(v => v.RegistrationNumber);
                     break;
 
                 case OverviewSortBy.ArrivalTime:
-                    rows = order == OverviewSortOrder.Ascending ? 
+                    rows = order == OverviewSortOrder.Ascending ?
                         rows.OrderBy(v => v.ArrivalTime) :
                         rows.OrderByDescending(v => v.ArrivalTime);
                     break;
 
                 case OverviewSortBy.Type:
-                    rows = order == OverviewSortOrder.Ascending ? 
+                    rows = order == OverviewSortOrder.Ascending ?
                         rows.OrderBy(v => v.Type.ToString()) :
-                        rows.OrderByDescending(v =>v.Type.ToString());
+                        rows.OrderByDescending(v => v.Type.ToString());
                     break;
 
                 case OverviewSortBy.ParkedTime:
-                    rows = order == OverviewSortOrder.Ascending ? 
+                    rows = order == OverviewSortOrder.Ascending ?
                         rows.OrderByDescending(v => v.ArrivalTime) :
-                        rows.OrderBy(v =>v.ArrivalTime);
+                        rows.OrderBy(v => v.ArrivalTime);
                     break;
 
                 default:
@@ -113,7 +113,9 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+            //var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+
+            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
@@ -125,7 +127,9 @@ namespace Garage_2.Controllers
             // Store the search string to pass back to Index
             ViewData["CurrentFilter"] = searchString;
 
-            return View(new DetailsViewModel(parkedVehicle));
+            return View(new DetailsViewModel(parkedVehicle, parkedVehicle.VehicleSpots.ToList()));
+
+            //return View(new DetailsViewModel(parkedVehicle));
         }
 
         // GET: ParkedVehicles/ParkNewVehicle
