@@ -25,6 +25,7 @@ namespace Garage_2.Controllers
         // GET: ParkedVehicles
         public async Task<IActionResult> Index(
             [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy, 
+            [FromQuery(Name = "order")] OverviewSortOrder? order, 
             [FromQuery(Name = "searchString")] string? searchString, 
             [FromQuery(Name = "page")] int page = 1)
         {
@@ -47,22 +48,33 @@ namespace Garage_2.Controllers
             switch (sortBy)
             {
                 case OverviewSortBy.RegistrationNumber:
-                    rows = rows.OrderBy(v => v.RegistrationNumber);
+                    rows = order == OverviewSortOrder.Ascending ? 
+                        rows.OrderBy(v => v.RegistrationNumber) :
+                        rows.OrderByDescending(v => v.RegistrationNumber);
                     break;
 
                 case OverviewSortBy.ArrivalTime:
-                    rows = rows.OrderBy(v => v.ArrivalTime);
+                    rows = order == OverviewSortOrder.Ascending ? 
+                        rows.OrderBy(v => v.ArrivalTime) :
+                        rows.OrderByDescending(v => v.ArrivalTime);
                     break;
 
                 case OverviewSortBy.Type:
-                    rows = rows.OrderBy(v => v.Type);
+                    rows = order == OverviewSortOrder.Ascending ? 
+                        rows.OrderBy(v => v.Type.ToString()) :
+                        rows.OrderByDescending(v =>v.Type.ToString());
                     break;
 
                 case OverviewSortBy.ParkedTime:
-                    rows = rows.OrderByDescending(v => v.ArrivalTime);
+                    rows = order == OverviewSortOrder.Ascending ? 
+                        rows.OrderByDescending(v => v.ArrivalTime) :
+                        rows.OrderBy(v =>v.ArrivalTime);
                     break;
 
                 default:
+                    sortBy = OverviewSortBy.ArrivalTime;
+                    order = OverviewSortOrder.Descending;
+                    rows = rows.OrderByDescending(v => v.ArrivalTime);
                     break;
             }
 
@@ -80,6 +92,7 @@ namespace Garage_2.Controllers
             {
                 OverviewList = currentRows,
                 SortBy = sortBy,
+                SortOrder = order,
                 Count = rowCount,
                 SearchString = searchString,
                 TotalPages = totalPages,

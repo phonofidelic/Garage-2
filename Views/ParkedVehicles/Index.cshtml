@@ -2,6 +2,27 @@
 
 @{
     ViewData["Title"] = "Index";
+
+    OverviewSortOrder GetSortOrder(OverviewSortBy sortBy)
+    {
+        if (Model.SortBy == sortBy)
+        {
+            return Model.SortOrder == OverviewSortOrder.Ascending ? OverviewSortOrder.Descending : OverviewSortOrder.Ascending;
+        }
+        else
+        {
+            return Model.SortOrder ?? OverviewSortOrder.Ascending;
+        }
+    };
+
+    string GetSortOrderIndicatorStyle()
+    {
+        string rotation = Model.SortOrder == OverviewSortOrder.Ascending
+        ? ""
+        : "transform: rotate(0.5turn);";
+
+        return rotation + " display: inline-block; width: 1rem; line-height: 1rem; text-align: center; font-size: 0.75rem";
+    }
 }
 
 @if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
@@ -39,62 +60,58 @@
                     asp-controller="ParkedVehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)"
+                    asp-route-order="@GetSortOrder(OverviewSortBy.RegistrationNumber)"
                     asp-route-searchString="@Model.SearchString"
                     asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.RegistrationNumber)
                 </a>
-                <span style="width: 8px">
-                    @if (Model.SortBy == OverviewSortBy.RegistrationNumber)
-                    {
-                        <span class="text-primary">🢑</span>
-                    }
-                </span>
+                @if (Model.SortBy == OverviewSortBy.RegistrationNumber)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
             <th td class="text-nowrap">
                 <a
                     asp-controller="ParkedVehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
+                    asp-route-order="@GetSortOrder(OverviewSortBy.ArrivalTime)"
                     asp-route-searchString="@Model.SearchString"
                     asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.ArrivalTime)
                 </a>
-                <span style="width: 8px">
-                    @if (Model.SortBy == OverviewSortBy.ArrivalTime)
-                    {
-                        <span class="text-primary">🢑</span>
-                    }
-                </span>
+                @if (Model.SortBy == OverviewSortBy.ArrivalTime)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
             <th td class="text-nowrap">
                 <a asp-controller="ParkedVehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.Type)"
+                   asp-route-order="@GetSortOrder(OverviewSortBy.Type)"
                    asp-route-searchString="@Model.SearchString"
                    asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.Type)
                 </a>
-                <span style="width: 8px">
-                    @if (Model.SortBy == OverviewSortBy.Type)
-                    {
-                        <span class="text-primary">🢑</span>
-                    }
-                </span>
+                @if (Model.SortBy == OverviewSortBy.Type)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
             <th td class="text-nowrap">
                 <a asp-controller="ParkedVehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.ParkedTime)"
+                   asp-route-order="@GetSortOrder(OverviewSortBy.ParkedTime)"
                    asp-route-searchString="@Model.SearchString"
                    asp-route-page="@Model.CurrentPage">
                     @Html.DisplayNameFor(model => model.OverviewItem.ParkedTime)
                 </a>
-                <span style="width: 8px">
-                    @if (Model.SortBy == OverviewSortBy.ParkedTime)
-                    {
-                        <span class="text-primary">🢑</span>
-                    }
-                </span>
+                @if (Model.SortBy == OverviewSortBy.ParkedTime)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
             <th></th>
         </tr>
@@ -132,6 +149,7 @@
     {
         <a asp-action="Index"
            asp-route-sortBy="@Model.SortBy"
+           asp-route-order="@Model.SortOrder"
            asp-route-searchString="@Model.SearchString"
            asp-route-page="@i"
            class="btn btn-sm @(i == Model.CurrentPage ? "btn-primary" : "btn-outline-primary")">

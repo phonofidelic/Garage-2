@@ -10,6 +10,8 @@ namespace Garage_2.Models.ViewModels
 
         public OverviewSortBy? SortBy { get; set; }
 
+        public OverviewSortOrder? SortOrder { get; set; }
+
         public int Count { get; set; }
 
         public string? SearchString { get; set; }
