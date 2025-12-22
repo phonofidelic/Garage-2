@@ -5,7 +5,6 @@ using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Garage_2.Controllers
 {
@@ -24,8 +23,8 @@ namespace Garage_2.Controllers
 
         // GET: ParkedVehicles
         public async Task<IActionResult> Index(
-            [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy, 
-            [FromQuery(Name = "searchString")] string? searchString, 
+            [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy,
+            [FromQuery(Name = "searchString")] string? searchString,
             [FromQuery(Name = "page")] int page = 1)
         {
             // Start with all vehicles and apply smart search
@@ -322,6 +321,23 @@ namespace Garage_2.Controllers
         {
             TempData["AlertType"] = type.ToString().ToLower(); // "success", "warning", "danger", "info"
             TempData["AlertMessage"] = message;
+        }
+
+        private int GetUnitsForVehicle(VehicleType type)
+        {
+            switch (type)
+            {
+                case VehicleType.Motorcycle:
+                    return 1;    // En MC behöver 1 tredjedels plats.
+                case VehicleType.Car:
+                    return 3;    // Bil 3 tredjedelar, dvs en hel p-plats.
+                case VehicleType.Bus:
+                    return 6;    // Buss 6 tredjedelar, dvs 2 hela p-platser
+                case VehicleType.Boat:
+                    return 9;  // Båt 9 tredjedelar, dvs 3 hela p-platser
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
     }
