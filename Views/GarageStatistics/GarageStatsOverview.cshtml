@@ -8,7 +8,7 @@
 <h1>Garage Statistics</h1>
 
 <div>
-    
+
     <hr />
     <dl class="row">
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.TotalVehicles)</dt>
@@ -18,7 +18,7 @@
         <dd class="col-sm-10">@Model.TotalWheels</dd>
 
         <dt class="col-sm-2">@Html.DisplayNameFor(m => m.TotalRevenue)</dt>
-        <dd class="col-sm-10">@Model.TotalRevenue</dd>
+        <dd class="col-sm-10">@($"{Model.TotalRevenue:N1} SEK")</dd>
 
         @if (Model.VehiclesPerType != null)
         {
@@ -30,6 +30,6 @@
                 <dd class="col-sm-10">@vehicleTypeCount.Count</dd>
             }
         }
-        
+
     </dl>
 </div>
