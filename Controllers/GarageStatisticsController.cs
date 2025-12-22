@@ -3,7 +3,6 @@ using Garage_2.Interfaces;
 using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Controllers
 {
@@ -57,7 +56,7 @@ namespace Garage_2.Controllers
                 totalRevenue += (decimal)(hours * (double)_config.PricePerHour * sizeMultiplier);
             }
 
-            DateTime now = DateTime.Now;
+            //DateTime now = DateTime.Now;
             var arrivalTimes = _context.ParkedVehicle.Select(v => v.ArrivalTime).ToList();
 
             double totalHours = 0;
@@ -68,7 +67,7 @@ namespace Garage_2.Controllers
                 totalHours += duration.TotalHours;
             }
 
-            decimal totalRevenue = (decimal)totalHours * _config.PricePerHour;
+            totalRevenue = (decimal)totalHours * _config.PricePerHour;
 
             // Round to closest int because otherwise too long
             totalRevenue = Math.Round(totalRevenue);
