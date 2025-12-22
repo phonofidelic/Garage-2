@@ -51,7 +51,7 @@ namespace Garage_2.Controllers
 
             GarageStatisticsViewModel GarageStatsVM = new GarageStatisticsViewModel
             {
-                TotalRevenue = 1000000,
+                TotalRevenue = totalRevenue,
                 TotalVehicles = totalVehicles,
                 TotalWheels = totalWheels,
                 VehiclesPerType = vehiclesPerTypeList
