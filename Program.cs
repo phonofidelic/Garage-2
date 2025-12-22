@@ -20,6 +20,7 @@ builder.Services.AddOptions<GarageConfig>()
     .ValidateOnStart();
 
 builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
+builder.Services.AddScoped<IParkingService, ParkingService>();
 
 var app = builder.Build();
 
