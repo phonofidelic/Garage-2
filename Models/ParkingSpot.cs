@@ -8,7 +8,7 @@ namespace Garage_2.Models
 
         // Obs! Hårkodad maxkapacitet av antalet parkeringsplatser här
         // Todo: Fixa detta?
-        [Range(1, 10000)]
+        [Range(1, 100)]
         public int SpotNumber { get; set; }
 
         // Varje spot har en kapacitet av 3 units.

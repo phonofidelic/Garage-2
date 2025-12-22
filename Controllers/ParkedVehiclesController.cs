@@ -144,12 +144,113 @@ namespace Garage_2.Controllers
                     Type = viewModel.Type
                 };
 
-                _context.Add(parkedVehicle);
+                // Lägg till fordonet i ParkedVehicle, måste göras först - för att få ett Id
+                _context.ParkedVehicle.Add(parkedVehicle);
                 await _context.SaveChangesAsync();
 
-                SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {viewModel.RegistrationNumber} has been parked.");
+                bool parkingSpotAssigned = false;
 
-                return RedirectToAction(nameof(Index));
+                // Hämta alla spots från garaget samt hur mycket av varje spot som är använd och hur mycket som är fri.                 
+                IQueryable<ParkingSpotWithUnits> spotsWithUsage = _context.ParkingSpots.Select(spot => new ParkingSpotWithUnits
+                {
+                    Spot = spot,
+                    UsedUnits = spot.VehicleSpots.Sum(vs => (int?)vs.UnitsUsed) ?? 0,
+                    FreeUnits = spot.CapacityUnits - (spot.VehicleSpots.Sum(vs => (int?)vs.UnitsUsed) ?? 0)  // Antal 'enheter' på p-platsen - för MC
+                }
+                );
+
+                int unitsNeeded = GetUnitsForVehicle(parkedVehicle.Type);
+                ParkingSpotWithUnits? mcSpot, carSpot;
+                VehicleSpot vehicleSpot;
+
+                // Försök hämta en eller flera parkeringsplatser eller enhet, beroende på fordonstyp
+                if (parkedVehicle.Type == VehicleType.Motorcycle)
+                {
+                    // Fyll redan använda p-platser först (där det redan står 1-2 MC), därefter fyll tom p-plats  
+                    mcSpot = spotsWithUsage.Where(s => s.FreeUnits >= 1).OrderByDescending(s => s.UsedUnits).ThenBy(s => s.Spot.SpotNumber).FirstOrDefault();
+
+                    if (mcSpot != null)
+                    {
+                        vehicleSpot = new VehicleSpot { ParkedVehicleId = parkedVehicle.Id, ParkingSpotId = mcSpot.Spot.Id, UnitsUsed = unitsNeeded };
+                        _context.VehicleSpots.Add(vehicleSpot);
+                        parkingSpotAssigned = true;
+                    }
+                }
+                else if (parkedVehicle.Type == VehicleType.Car)
+                {
+                    carSpot = spotsWithUsage.Where(s => s.UsedUnits == 0 && s.Spot.CapacityUnits >= 3).OrderBy(s => s.Spot.SpotNumber).FirstOrDefault();
+
+                    if (carSpot != null)
+                    {
+                        vehicleSpot = new VehicleSpot { ParkedVehicleId = parkedVehicle.Id, ParkingSpotId = carSpot.Spot.Id, UnitsUsed = unitsNeeded };
+                        _context.VehicleSpots.Add(vehicleSpot);
+                        parkingSpotAssigned = true;
+                    }
+                }
+                else if (parkedVehicle.Type == VehicleType.Bus)
+                {
+                    // Lista alla helt lediga platser i ordning
+                    var freeSpots = spotsWithUsage.Where(s => s.UsedUnits == 0).OrderBy(s => s.Spot.SpotNumber).Select(s => s.Spot).ToList();
+
+                    var consecutiveSpots = FindConsecutiveSpots(freeSpots, 2); // Kolla om det finns 2 sammanhängande spots
+
+                    if (consecutiveSpots != null)
+                    {
+                        foreach (var spot in consecutiveSpots)
+                        {
+                            _context.VehicleSpots.Add(new VehicleSpot
+                            {
+                                ParkedVehicleId = parkedVehicle.Id,
+                                ParkingSpotId = spot.Id,
+                                UnitsUsed = 3                    // Varje VehicleSpot representerar 3 enheter (1 hel p-plats)
+                            });
+                        }
+
+                        parkingSpotAssigned = true;
+                    }
+
+
+                }
+                else if (parkedVehicle.Type == VehicleType.Boat)
+                {
+
+                    var freeSpots = spotsWithUsage.Where(s => s.UsedUnits == 0).OrderBy(s => s.Spot.SpotNumber).Select(s => s.Spot).ToList();
+
+                    var consecutiveSpots = FindConsecutiveSpots(freeSpots, 3); // Kolla om det finns 3 sammanhängande spots
+
+                    if (consecutiveSpots != null)
+                    {
+                        foreach (var spot in consecutiveSpots)
+                        {
+                            _context.VehicleSpots.Add(new VehicleSpot
+                            {
+                                ParkedVehicleId = parkedVehicle.Id,
+                                ParkingSpotId = spot.Id,
+                                UnitsUsed = 3            // Varje VehicleSpot representerar 3 enheter (1 hel p-plats)
+                            });
+                        }
+
+                        parkingSpotAssigned = true;
+                    }
+                }
+
+
+                if (!parkingSpotAssigned) // Om ingen parkeringsplats(-er) kunde tilldelas fordonet - Ta bort det ur ParkedVehicle-tabellen
+                {
+                    _context.ParkedVehicle.Remove(parkedVehicle);
+                    await _context.SaveChangesAsync();
+
+                    SetAlertInTempData(AlertType.warning, "No parking slots available for this vehicle.");
+                    return RedirectToAction(nameof(Index));
+                }
+                else // Annars - spara tilldelad(e) parkeringplats(er) för fordonet
+                {
+                    await _context.SaveChangesAsync();
+
+                    SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {viewModel.RegistrationNumber} has been parked.");
+
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             return View(viewModel);
@@ -323,6 +424,8 @@ namespace Garage_2.Controllers
             TempData["AlertMessage"] = message;
         }
 
+
+        // ***************** Hjälpmetoder för parkering av olika fordonstyper *******************
         private int GetUnitsForVehicle(VehicleType type)
         {
             switch (type)
@@ -340,5 +443,26 @@ namespace Garage_2.Controllers
             }
         }
 
+        private List<ParkingSpot>? FindConsecutiveSpots(List<ParkingSpot> freeSpots, int requiredSpots)
+        {
+            for (int i = 0; i <= freeSpots.Count - requiredSpots; i++)
+            {
+                var slice = freeSpots.Skip(i).Take(requiredSpots).ToList();
+
+                bool consecutive = slice.Select(s => s.SpotNumber).SequenceEqual(Enumerable.Range(slice.First().SpotNumber, requiredSpots));
+                if (consecutive)
+                    return slice;
+            }
+            return null;
+        }
+
+
+    }
+
+    public class ParkingSpotWithUnits
+    {
+        public ParkingSpot? Spot { get; set; }
+        public int UsedUnits { get; set; }
+        public int FreeUnits { get; set; }
     }
 }
