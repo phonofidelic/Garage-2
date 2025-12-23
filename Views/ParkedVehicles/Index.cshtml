@@ -1,51 +1,129 @@
-﻿@model IEnumerable<Garage_2.Models.ViewModels.OverviewViewModel>
+﻿@model Garage_2.Models.ViewModels.OverviewViewModel
 
 @{
     ViewData["Title"] = "Index";
+
+    OverviewSortOrder GetSortOrder(OverviewSortBy sortBy)
+    {
+        if (Model.SortBy == sortBy)
+        {
+            return Model.SortOrder == OverviewSortOrder.Ascending ? OverviewSortOrder.Descending : OverviewSortOrder.Ascending;
+        }
+        else
+        {
+            return Model.SortOrder ?? OverviewSortOrder.Ascending;
+        }
+    };
+
+    string GetSortOrderIndicatorStyle()
+    {
+        string rotation = Model.SortOrder == OverviewSortOrder.Ascending
+        ? ""
+        : "transform: rotate(0.5turn);";
+
+        return rotation + " display: inline-block; width: 1rem; line-height: 1rem; text-align: center; font-size: 0.75rem";
+    }
 }
 
 @if (TempData["AlertMessage"] is string alert && TempData["AlertType"] is string type)
 {
     <div class="position-fixed w-100 bottom-0 start-0 mb-3">
         <div class="alert alert-@type alert-dismissible fade show shadow  w-75 m-auto" role="alert">
-            @Html.Raw(alert)
+            @alert
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 }
 
-<div class="row my-4">
-    <div class="col-auto">
-        <a asp-action="ParkNewVehicle" class="btn btn-primary">Park new vehicle</a>
-    </div>
-    <div class="col text-end">
-        <partial name="_SearchPartial" />
+<div
+    class="position-fixed bg-body start-0 end-0 z-1"
+    style="top: 48px; @@media (min-width: 768px) { top: 57px }">
+    <div class="container d-flex p-3 px-4 gap-2">
+        <div>
+            <a asp-action="ParkNewVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Park
+                <span class="d-none d-sm-inline">new vehicle</span>
+            </a>
+        </div>
+        <div class="d-none d-sm-flex text-nowrap align-items-center gap-1">
+            Parked vehicles: @Model.Count
+        </div>
+        <div class="d-flex flex-grow-1 justify-content-end">
+            <partial name="_SearchPartial" />
+        </div>
     </div>
 </div>
 
-<table class="table">
-    <thead>
+<table class="table table-striped" style="margin-top: 108px">
+    <thead
+        class="position-sticky w-100 bg-body p-3 h-100 mt-0 z-2"
+           style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.RegistrationNUmber)
+            <th td class="text-nowrap">
+                <a
+                    asp-controller="ParkedVehicles"
+                    asp-action="Index"
+                    asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)"
+                    asp-route-order="@GetSortOrder(OverviewSortBy.RegistrationNumber)"
+                    asp-route-searchString="@Model.SearchString"
+                    asp-route-page="@Model.CurrentPage">
+                    @Html.DisplayNameFor(model => model.OverviewItem.RegistrationNumber)
+                </a>
+                @if (Model.SortBy == OverviewSortBy.RegistrationNumber)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ArrivalTime)
+            <th td class="text-nowrap">
+                <a
+                    asp-controller="ParkedVehicles"
+                    asp-action="Index"
+                    asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
+                    asp-route-order="@GetSortOrder(OverviewSortBy.ArrivalTime)"
+                    asp-route-searchString="@Model.SearchString"
+                    asp-route-page="@Model.CurrentPage">
+                    @Html.DisplayNameFor(model => model.OverviewItem.ArrivalTime)
+                </a>
+                @if (Model.SortBy == OverviewSortBy.ArrivalTime)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Type)
+            <th td class="text-nowrap">
+                <a asp-controller="ParkedVehicles"
+                   asp-action="Index"
+                   asp-route-sortBy="@nameof(Model.OverviewItem.Type)"
+                   asp-route-order="@GetSortOrder(OverviewSortBy.Type)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-page="@Model.CurrentPage">
+                    @Html.DisplayNameFor(model => model.OverviewItem.Type)
+                </a>
+                @if (Model.SortBy == OverviewSortBy.Type)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ParkedTime)
+            <th td class="text-nowrap">
+                <a asp-controller="ParkedVehicles"
+                   asp-action="Index"
+                   asp-route-sortBy="@nameof(Model.OverviewItem.ParkedTime)"
+                   asp-route-order="@GetSortOrder(OverviewSortBy.ParkedTime)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-page="@Model.CurrentPage">
+                    @Html.DisplayNameFor(model => model.OverviewItem.ParkedTime)
+                </a>
+                @if (Model.SortBy == OverviewSortBy.ParkedTime)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.OverviewList) {
         <tr>
             <td class="text-nowrap">
-                @Html.DisplayFor(modelItem => item.RegistrationNUmber)
+                @Html.DisplayFor(modelItem => item.RegistrationNumber)
             </td>
                 <td class="text-nowrap">
                 @Html.DisplayFor(modelItem => item.ArrivalTime)
@@ -58,7 +136,7 @@
             </td>
             <td>
                 <div class="d-flex flex-nowrap gap-2">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary text-nowrap">Details</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-searchString="@Model.SearchString" class="btn btn-sm btn-outline-secondary text-nowrap">Details</a>
                     <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary text-nowrap">Edit</a>
                     <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-nowrap">Check out</a>
                 </div>
@@ -67,3 +145,38 @@
 }
     </tbody>
 </table>
+<div class="mt-3">
+    <span>Page: </span>
+    @for (int i = 1; i <= Model.TotalPages; i++)
+    {
+        <a asp-action="Index"
+           asp-route-sortBy="@Model.SortBy"
+           asp-route-order="@Model.SortOrder"
+           asp-route-searchString="@Model.SearchString"
+           asp-route-page="@i"
+           class="btn btn-sm @(i == Model.CurrentPage ? "btn-primary" : "btn-outline-primary")">
+            @i
+        </a>
+    }
+</div>
+
+<div class="modal fade" id="searchHelpModal" tabindex="-1" aria-labelledby="searchHelpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchHelpModalLabel">Search Help</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Text Search:</strong> Search by registration number, make, model, or color.</p>
+                <hr />
+                <p><strong>Search by commands:</strong></p>
+                <ul class="list-unstyled">
+                    <li><code>w(4)</code> – Filter by number of wheels</li>
+                    <li><code>t(car)</code> – Filter by vehicle type</li>
+                    <li><code>d(2025-12-19)</code> – Filter by arrival time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

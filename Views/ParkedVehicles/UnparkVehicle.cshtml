@@ -5,10 +5,14 @@
 }
 
 <h1>Check out vehicle</h1>
-
-<h3>Are you sure you want to check out this vehicle?</h3>
 <div>
-    <h4>Parked Vehicle</h4>
+    <h4>
+        Parked Vehicle  
+    </h4>
+    <p>
+        <strong> At parking spot(s) no:</strong>
+        @string.Join(", ", Model.VehicleSpots.Select(vs => vs.ParkingSpot.SpotNumber))
+    </p>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -54,6 +58,8 @@
             @Html.DisplayFor(model => model.Type)
         </dd>
     </dl>
+
+   
 
 	<form asp-action="UnparkConfirmed">
 		<a class="btn btn-outline-secondary" asp-action="Index">Back to List</a>

@@ -1,17 +1,23 @@
-﻿namespace Garage_2.Models.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Garage_2.Models.ViewModels
 {
     public class OverviewViewModel
     {
+        public OverviewListItemViewModel OverviewItem { get; set; } = default!;
 
-        public int Id { get; set; }
+        public IEnumerable<OverviewListItemViewModel> OverviewList { get; set; } = default!;
 
-        public VehicleType Type { get; set; }
+        public OverviewSortBy? SortBy { get; set; }
 
-        public string RegistrationNUmber { get; set; }
+        public OverviewSortOrder? SortOrder { get; set; }
 
-        public DateTime ArrivalTime { get; set; }
+        public int Count { get; set; }
 
-        public TimeSpan ParkedTime { get; set; }
+        public string? SearchString { get; set; }
 
+        public int TotalPages { get; set; }
+
+        public int CurrentPage { get; set; }
     }
 }

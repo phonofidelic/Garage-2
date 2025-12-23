@@ -1,7 +1,23 @@
+@model Garage_2.Models.ViewModels.OverviewViewModel
+
 <form asp-action="Index" method="get">
-    <div class="d-flex gap-2 justify-content-end">
-        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
-               class="form-control" style="width: 250px;" placeholder="Search by registration number..." />
+    <div class="d-flex gap-2 justify-content-end align-items-center">
+        <input type="hidden" name="sortBy" value="@Model.SortBy" />
+        <input type="hidden" name="order" value="@Model.SortOrder" />
+        <input type="text" name="searchString" value="@Model.SearchString"
+               class="form-control" style="max-width: 250px;"
+               placeholder="Search vehicles..." />
+
+        <button type="button" class="btn btn-outline-info btn-sm"
+                data-bs-toggle="modal" data-bs-target="#searchHelpModal"
+                title="Search help">
+            ?
+        </button>
+
+        @if (Model.SearchString != null)
+        {
+            <a asp-action="Index" class="btn btn-outline-danger">Clear</a>
+        }
         <button type="submit" class="btn btn-secondary">Search</button>
     </div>
 </form>

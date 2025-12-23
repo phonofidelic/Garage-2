@@ -3,10 +3,11 @@
     public class DetailsViewModel
     {
         public ParkedVehicle Vehicle { get; }
-
-        public DetailsViewModel(ParkedVehicle parkedVehicle)
+        public IReadOnlyList<VehicleSpot> VehicleSpots { get; }
+        public DetailsViewModel(ParkedVehicle vehicle, List<VehicleSpot> vehicleSpots)
         {
-            Vehicle = parkedVehicle;
+            Vehicle = vehicle;
+            VehicleSpots = vehicleSpots;
         }
     }
 }

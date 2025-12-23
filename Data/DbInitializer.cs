@@ -13,15 +13,24 @@ namespace Garage_2.Data
             GarageContext context = appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<GarageContext>();
 
             // Fyll bara på med seed-data om db är tom (dvs ingen överskrivning av befintligt data)
+
             if (!context.ParkedVehicle.Any())
                 context.ParkedVehicle.AddRange(parkedVehiclesList);
 
+            if (!context.ParkingSpots.Any())
+                context.ParkingSpots.AddRange(ParkingSpotsList());
 
             context.SaveChanges();
+
+            // Endast om data finns i både ParkedVehicle och ParkingSpots kan join-tabellen fyllas med relationer
+            if (context.ParkingSpots.Any() && context.ParkedVehicle.Any())
+            {
+                SeedVehicleSpots(context);
+            }
         }
 
 
-        // Seed-data – Lista av vehicles av alla typer i applikationen (Car, Motorcycle, Bus, Boat)
+        // Seed-data – Lista (property) av vehicles av alla typer i applikationen (Car, Motorcycle, Bus, Boat)
         // Olika parkeringsdatum (ArrivalTime) för att kunna få ut lite olika priser vid uthämtning av fordonet
         public static List<ParkedVehicle> parkedVehiclesList
         {
@@ -199,7 +208,87 @@ namespace Garage_2.Data
             }
         }
 
+
+        // Seed-data – Lista av p-platser (ParkingSpot) 1-50 (hårdkodat) med initial kapacitet 3, dvs tomma parkeringsplatser
+        private static List<ParkingSpot> ParkingSpotsList()
+        {
+            var spots = new List<ParkingSpot>();
+
+            // Obs! Hårdkodat antal p-platser i garaget här.
+            // TODO: Borde fixas, hämtas från config istället (?)
+            const int totalSpots = 50;
+
+            for (int i = 1; i <= totalSpots; i++)
+            {
+                spots.Add(new ParkingSpot { SpotNumber = i, CapacityUnits = 3 });
+            }
+
+            return spots;
+
+        }
+
+        private static void SeedVehicleSpots(GarageContext context)
+        {
+            if (!context.VehicleSpots.Any())
+            {
+                var spots = context.ParkingSpots
+                    .OrderBy(s => s.SpotNumber)
+                    .ToList();
+
+                var vehicles = context.ParkedVehicle
+                    .OrderBy(v => v.Id)
+                    .ToList();
+
+                int spotIndex = 0;
+                int unitsRequired;
+
+                foreach (var vehicle in vehicles)
+                {
+                    unitsRequired = 0;
+
+                    switch (vehicle.Type)
+                    {
+                        case VehicleType.Motorcycle:
+                            unitsRequired = 1;
+                            break;
+                        case VehicleType.Car:
+                            unitsRequired = 3;
+                            break;
+                        case VehicleType.Bus:
+                            unitsRequired = 6;
+                            break;
+                        case VehicleType.Boat:
+                            unitsRequired = 9;
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    int unitsLeft = unitsRequired;
+
+                    while (unitsLeft > 0)
+                    {
+                        var spot = spots[spotIndex];
+
+                        context.VehicleSpots.Add(new VehicleSpot
+                        {
+                            ParkedVehicleId = vehicle.Id,
+                            ParkingSpotId = spot.Id,
+                            UnitsUsed = Math.Min(3, unitsLeft)
+                        });
+
+                        unitsLeft -= 3;
+                        spotIndex++;
+                    }
+                }
+
+                context.SaveChanges();
+            }
+        }
     }
+
+
 }
+
 
 

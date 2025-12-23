@@ -1,5 +1,7 @@
 ﻿using Garage_2;
 using Garage_2.Data;
+using Garage_2.Interfaces;
+using Garage_2.Services;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -16,6 +18,9 @@ builder.Services.AddOptions<GarageConfig>()
     .BindConfiguration(nameof(GarageConfig))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+
+builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
+builder.Services.AddScoped<IParkingService, ParkingService>();
 
 var app = builder.Build();
 

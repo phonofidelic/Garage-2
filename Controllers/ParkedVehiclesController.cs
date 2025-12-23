@@ -1,4 +1,5 @@
 ﻿using Garage_2.Data;
+using Garage_2.Interfaces;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -11,41 +12,100 @@ namespace Garage_2.Controllers
     {
         private readonly GarageContext _context;
         private readonly GarageConfig _config;
+        private readonly IVehicleSearchService _searchService;
+        private readonly IParkingService _parkingService;
 
-        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config)
+        public ParkedVehiclesController(GarageContext context, IOptions<GarageConfig> config, IVehicleSearchService searchService, IParkingService parkingService)
         {
             _context = context;
             _config = config.Value;
+            _searchService = searchService;
+            _parkingService = parkingService;
         }
 
         // GET: ParkedVehicles
-        public async Task<IActionResult> Index(string? searchString)
+        public async Task<IActionResult> Index(
+            [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy,
+            [FromQuery(Name = "order")] OverviewSortOrder? order,
+            [FromQuery(Name = "searchString")] string? searchString,
+            [FromQuery(Name = "page")] int page = 1)
         {
-            // Store the search string in ViewData
-            ViewData["CurrentFilter"] = searchString;
-
-            // Start with all vehicles from the database
-            var vehicles = from v in _context.ParkedVehicle select v;
-
-            // Filter vehicles by registration number if a search string is provided
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                vehicles = vehicles.Where(v => v.RegistrationNumber.Contains(searchString));
-            }
+            // Start with all vehicles and apply smart search
+            var query = _searchService.Search(_context.ParkedVehicle, searchString);
 
             // Execute the query, put the data into overviewmodel and return view
-            return View(await vehicles.Select(v => new OverviewViewModel
+            var now = DateTime.Now;
+            IEnumerable<OverviewListItemViewModel> rows = query
+                .Select(v => new OverviewListItemViewModel
+                {
+                    Id = v.Id,
+                    RegistrationNumber = v.RegistrationNumber,
+                    Type = v.Type,
+                    ArrivalTime = v.ArrivalTime,
+                    ParkedTime = now - v.ArrivalTime
+                });
+
+            //  Apply sorting
+            switch (sortBy)
             {
-                Id = v.Id,
-                RegistrationNUmber = v.RegistrationNumber,
-                Type = v.Type,
-                ArrivalTime = v.ArrivalTime,
-                ParkedTime = DateTime.Now - v.ArrivalTime
-            }).ToListAsync());
+                case OverviewSortBy.RegistrationNumber:
+                    rows = order == OverviewSortOrder.Ascending ?
+                        rows.OrderBy(v => v.RegistrationNumber) :
+                        rows.OrderByDescending(v => v.RegistrationNumber);
+                    break;
+
+                case OverviewSortBy.ArrivalTime:
+                    rows = order == OverviewSortOrder.Ascending ?
+                        rows.OrderBy(v => v.ArrivalTime) :
+                        rows.OrderByDescending(v => v.ArrivalTime);
+                    break;
+
+                case OverviewSortBy.Type:
+                    rows = order == OverviewSortOrder.Ascending ?
+                        rows.OrderBy(v => v.Type.ToString()) :
+                        rows.OrderByDescending(v => v.Type.ToString());
+                    break;
+
+                case OverviewSortBy.ParkedTime:
+                    rows = order == OverviewSortOrder.Ascending ?
+                        rows.OrderByDescending(v => v.ArrivalTime) :
+                        rows.OrderBy(v => v.ArrivalTime);
+                    break;
+
+                default:
+                    sortBy = OverviewSortBy.ArrivalTime;
+                    order = OverviewSortOrder.Descending;
+                    rows = rows.OrderByDescending(v => v.ArrivalTime);
+                    break;
+            }
+
+            int rowCount = rows.Count();
+            int pageSize = 10;
+            var totalPages = (int)Math.Ceiling((double)rowCount / pageSize);
+
+            var currentRows = rows
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+            // Build the ViewModdel
+            OverviewViewModel viewModel = new()
+            {
+                OverviewList = currentRows,
+                SortBy = sortBy,
+                SortOrder = order,
+                Count = rowCount,
+                SearchString = searchString,
+                TotalPages = totalPages,
+                CurrentPage = page
+            };
+
+            // Return the view
+            return View(viewModel);
         }
 
         // GET: ParkedVehicles/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? searchString)
         {
             if (id == null)
             {
@@ -53,7 +113,9 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+            //var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+
+            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
@@ -61,7 +123,13 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(new DetailsViewModel(parkedVehicle));
+            // DoDo: Move to DetailsViewModel?
+            // Store the search string to pass back to Index
+            ViewData["CurrentFilter"] = searchString;
+
+            return View(new DetailsViewModel(parkedVehicle, parkedVehicle.VehicleSpots.ToList()));
+
+            //return View(new DetailsViewModel(parkedVehicle));
         }
 
         // GET: ParkedVehicles/ParkNewVehicle
@@ -71,8 +139,6 @@ namespace Garage_2.Controllers
         }
 
         // POST: ParkedVehicles/ParkNewVehicle
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ParkNewVehicle([Bind("Id,RegistrationNumber,Make,Model,NumberOfWheels,Color,ArrivalTime,Type")] ParkNewVehicleViewModel viewModel)
@@ -95,11 +161,15 @@ namespace Garage_2.Controllers
                     Type = viewModel.Type
                 };
 
-                _context.Add(parkedVehicle);
-                await _context.SaveChangesAsync();
+                var result = await _parkingService.ParkVehicleAsync(parkedVehicle);
 
-                SetAlertInTempData(AlertType.success, $"Vehicle with <strong>RegNum: {viewModel.RegistrationNumber}</strong> has been parked.");
+                if (!result.Success)
+                {
+                    SetAlertInTempData(AlertType.warning, result.ErrorMessage!);
+                    return RedirectToAction(nameof(Index));
+                }
 
+                SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {viewModel.RegistrationNumber} has been parked.");
                 return RedirectToAction(nameof(Index));
             }
 
@@ -140,8 +210,6 @@ namespace Garage_2.Controllers
         }
 
         // POST: ParkedVehicles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditVehicle(int id, ParkedVehicleEditViewModel vm)
@@ -175,7 +243,7 @@ namespace Garage_2.Controllers
 
 
                     await _context.SaveChangesAsync();
-                    SetAlertInTempData(AlertType.success, $"Vehicle with <strong>RegNum: {parkedVehicle.RegistrationNumber}</strong> was updated successfully.");
+                    SetAlertInTempData(AlertType.success, $"Vehicle with RegNum: {parkedVehicle.RegistrationNumber} was updated successfully.");
                     return RedirectToAction(nameof(Index));
 
                 }
@@ -204,7 +272,8 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
+            // Hämta fordonet till vyn, inkludera join-tabell med relationerna till p-plaser, samt p-platserna själva
+            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
@@ -220,7 +289,10 @@ namespace Garage_2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnparkConfirmed(int id)
         {
-            var vehicle = await _context.ParkedVehicle.FindAsync(id);
+            //var vehicle = await _context.ParkedVehicle.FindAsync(id);
+
+            // Hämta vehicle med tillhörande ParkingSpot(s) i nav-property, via join-table:n VehicleSpots
+            var vehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
             { //return NotFound();
@@ -231,8 +303,12 @@ namespace Garage_2.Controllers
             DateTime checkoutTime = DateTime.Now;
             TimeSpan totalParkingTime = checkoutTime - vehicle.ArrivalTime;
 
-            // Price calculated on every started hour
-            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour;
+            int unitsUsed = _context.VehicleSpots.Where(v => v.ParkedVehicleId == id).Sum(v => v.UnitsUsed);
+
+            decimal sizeMultiplier = (decimal)unitsUsed / 3;
+
+            // Calculate Price 
+            decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour * sizeMultiplier;
 
             var receiptVM = new ReceiptViewModel
             {
@@ -241,14 +317,16 @@ namespace Garage_2.Controllers
                 ArrivalTime = vehicle.ArrivalTime,
                 CheckoutTime = checkoutTime,
                 ParkingDuration = totalParkingTime,
-                Price = totalPrice
+                Price = totalPrice,
+                ParkingSpots = vehicle.VehicleSpots.Select(vs => vs.ParkingSpot.SpotNumber).ToList()
             };
 
             // Todo: try-catch här
+            // Pga cascade delete i GarageContext tas även tillhörande rader bort ur join-table:n VehicleSpot, vilket också frigör platserna i ParkingSpots 
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
-            SetAlertInTempData(AlertType.success, $"Vehicle with RegNo: <strong>{receiptVM.RegistrationNumber}</strong> has been checked out.");
+            SetAlertInTempData(AlertType.success, $"Vehicle with RegNo: {receiptVM.RegistrationNumber} has been checked out.");
 
             return View("Receipt", receiptVM);
         }

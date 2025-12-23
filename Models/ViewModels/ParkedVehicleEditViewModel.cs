@@ -4,24 +4,36 @@ namespace Garage_2.Models.ViewModels
 {
     public class ParkedVehicleEditViewModel
     {
+        private string _registrationNumber = default!;
         public int Id { get; set; }
 
         [Required, StringLength(6, MinimumLength = 6)]
-        public string RegistrationNumber { get; set; } = default!;
+        [RegularExpression(@"^[A-Za-z0-9]{6}$", ErrorMessage = "Registration number must be exactly 6 alphanumeric characters (A-Z, 0-9).")]
+        [Display(Name = "Registration number")]
+        public string RegistrationNumber
+        {
+            get => _registrationNumber;
+            set => _registrationNumber = value?.ToUpper() ?? default!;
+        }
 
-        [Required, StringLength(100)]
+        [Required, StringLength(50)]
+        [RegularExpression(@"^[\w\-\.\s]+$", ErrorMessage = "Make may only contain alphanumeric characters, spaces, \"-\" and \".\"")]
         public string Make { get; set; } = default!;
 
-        [Required, StringLength(100)]
+        [Required, StringLength(50)]
+        [RegularExpression(@"^[\w\-\.\s]+$", ErrorMessage = "Model may only contain alphanumeric characters, spaces, \"-\" and \".\"")]
         public string Model { get; set; } = default!;
 
         [Required, Range(0, 22)]
+        [Display(Name = "Number of wheels")]
         public int NumberOfWheels { get; set; }
 
-        [Required, StringLength(100)]
+        [Required, StringLength(25)]
+        [RegularExpression(@"^[\w\s]+$", ErrorMessage = "Make may only contain alphanumeric characters and spaces.")]
         public string Color { get; set; } = default!;
 
         // Visible in edit view, but can not be changed.
+        [Display(Name = "Arrival time")]
         public DateTime ArrivalTime { get; set; }
 
         [Required]
