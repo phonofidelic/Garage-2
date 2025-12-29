@@ -30,7 +30,7 @@
 
 	<hr />
 
-<h4>Total price: @($"{Model.Price:N1} SEK")</h4>
+<h4>Total price: @string.Format("{0:C2}", Model.Price)</h4>
 
 <a class="btn btn-outline-secondary no-print" asp-action="Index">Back to List</a>
 <button onclick="window.print()" class="btn btn-success no-print">Print receipt</button>
