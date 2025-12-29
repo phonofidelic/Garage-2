@@ -32,6 +32,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<GarageContext>();
+    db.Database.Migrate();
+}
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
