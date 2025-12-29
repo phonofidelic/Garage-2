@@ -289,13 +289,11 @@ namespace Garage_2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnparkConfirmed(int id)
         {
-            //var vehicle = await _context.ParkedVehicle.FindAsync(id);
-
             // Hämta vehicle med tillhörande ParkingSpot(s) i nav-property, via join-table:n VehicleSpots
             var vehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
-            { //return NotFound();
+            {
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
                 return RedirectToAction(nameof(Index));
             }
