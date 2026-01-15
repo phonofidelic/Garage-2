@@ -11,7 +11,5 @@
         public bool IsBlocked { get; set; }
 
         public ICollection<VehicleParking> VehicleParkings { get; set; } = new List<VehicleParking>();
-
-        //public ICollection<ParkingSession> ParkingSessions{ get; set; }
     }
 }
