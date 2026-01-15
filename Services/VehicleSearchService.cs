@@ -6,19 +6,7 @@ namespace Garage_2.Services;
 
 public class VehicleSearchService : IVehicleSearchService
 {
-    //// w(4) or wheels(4) - search by number of wheels
-    //[GeneratedRegex(@"^w(?:heels)?\((\d+)\)$", RegexOptions.IgnoreCase)]
-    //private static partial Regex WheelsPattern();
-
-    //// d(2024-12-19) or date(2024-12-19) - search by arrival date
-    //[GeneratedRegex(@"^d(?:ate)?\((.+)\)$", RegexOptions.IgnoreCase)]
-    //private static partial Regex DatePattern();
-
-    //// t(car) or type(motorcycle) - search by vehicle type
-    //[GeneratedRegex(@"^t(?:ype)?\((.+)\)$", RegexOptions.IgnoreCase)]
-    //private static partial Regex TypePattern();
-
-    public IQueryable<T> Search<T>(IQueryable<T> query, string? searchString) where T : class
+    public IQueryable<T> Search<T>(IQueryable<T> query, string? searchString, string? searchField = null) where T : class
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return query;
@@ -29,40 +17,60 @@ public class VehicleSearchService : IVehicleSearchService
         {
             var vehicleQuery = query as IQueryable<ParkedVehicle>;
 
-            // Check for special command patterns first
-            //var wheelsMatch = WheelsPattern().Match(search);
-            //if (wheelsMatch.Success && int.TryParse(wheelsMatch.Groups[1].Value, out var wheels))
-            //{
-            //    return (IQueryable<T>)vehicleQuery!.Where(v => v.NumberOfWheels == wheels);
-            //}
+            if (!string.IsNullOrEmpty(searchField))
+            {
+                return searchField.ToLower() switch
+                {
+                    "wheels" => (IQueryable<T>)FilterByWheels(vehicleQuery!, search),
+                    "type" => (IQueryable<T>)FilterByType(vehicleQuery!, search),
+                    "date" => (IQueryable<T>)FilterByDate(vehicleQuery!, search),
+                    _ => (IQueryable<T>)FilterAllFields(vehicleQuery!, search)
+                };
+            }
 
-            //var dateMatch = DatePattern().Match(search);
-            //if (dateMatch.Success && DateTime.TryParse(dateMatch.Groups[1].Value, out var date))
-            //{
-            //    return (IQueryable<T>)vehicleQuery!.Where(v => v.ArrivalTime.Date == date.Date);
-            //}
-
-            //var typeMatch = TypePattern().Match(search);
-            //if (typeMatch.Success)
-            //{
-            //    var typeSearch = typeMatch.Groups[1].Value;
-            //    var matchingTypes = Enum.GetValues<VehicleType>()
-            //        .Where(t => t.ToString().Contains(typeSearch, StringComparison.OrdinalIgnoreCase))
-            //        .ToList();
-
-            //    return (IQueryable<T>)vehicleQuery!.Where(v => matchingTypes.Contains(v.Type));
-            //}
-
-            var filtered = vehicleQuery!.Where(v =>
-                v.RegistrationNumber.Contains(search) ||
-                v.Make.Contains(search) ||
-                v.Model.Contains(search) ||
-                v.Color.Contains(search)
-            );
-
-            return (IQueryable<T>)filtered;
+            // Default: search across all text fields
+            return (IQueryable<T>)FilterAllFields(vehicleQuery!, search);
         }
 
         return query;
+    }
+
+    private IQueryable<ParkedVehicle> FilterByWheels(IQueryable<ParkedVehicle> query, string search)
+    {
+        if (int.TryParse(search, out var wheels))
+        {
+            return query.Where(v => v.NumberOfWheels == wheels);
+        }
+        // If parse fails, return no results
+        return query.Where(v => false);
+    }
+
+    private IQueryable<ParkedVehicle> FilterByType(IQueryable<ParkedVehicle> query, string search)
+    {
+        var matchingTypes = Enum.GetValues<VehicleType>()
+            .Where(t => t.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return query.Where(v => matchingTypes.Contains(v.Type));
+    }
+
+    private IQueryable<ParkedVehicle> FilterByDate(IQueryable<ParkedVehicle> query, string search)
+    {
+        if (DateTime.TryParse(search, out var date))
+        {
+            return query.Where(v => v.ArrivalTime.Date == date.Date);
+        }
+        // If parse fails, return no results
+        return query.Where(v => false);
+    }
+
+    private IQueryable<ParkedVehicle> FilterAllFields(IQueryable<ParkedVehicle> query, string search)
+    {
+        return query.Where(v =>
+            v.RegistrationNumber.Contains(search) ||
+            v.Make.Contains(search) ||
+            v.Model.Contains(search) ||
+            v.Color.Contains(search)
+        );
     }
 }

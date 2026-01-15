@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Garage_2.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class ParkedVehiclesController : Controller
     {
         private readonly GarageContext _context;
@@ -30,10 +30,11 @@ namespace Garage_2.Controllers
             [FromQuery(Name = "sortBy")] OverviewSortBy? sortBy,
             [FromQuery(Name = "order")] OverviewSortOrder? order,
             [FromQuery(Name = "searchString")] string? searchString,
+            [FromQuery(Name = "searchField")] string? searchField,
             [FromQuery(Name = "page")] int page = 1)
         {
             // Start with all vehicles and apply smart search
-            var query = _searchService.Search(_context.ParkedVehicle, searchString);
+            var query = _searchService.Search(_context.ParkedVehicle, searchString, searchField);
 
             // Execute the query, put the data into overviewmodel and return view
             var now = DateTime.Now;
@@ -90,7 +91,6 @@ namespace Garage_2.Controllers
             .Take(pageSize)
             .ToList();
 
-            // Build the ViewModdel
             OverviewViewModel viewModel = new()
             {
                 OverviewList = currentRows,
@@ -98,11 +98,11 @@ namespace Garage_2.Controllers
                 SortOrder = order,
                 Count = rowCount,
                 SearchString = searchString,
+                SearchField = searchField ?? string.Empty,
                 TotalPages = totalPages,
                 CurrentPage = page
             };
 
-            // Return the view
             return View(viewModel);
         }
 
@@ -307,7 +307,7 @@ namespace Garage_2.Controllers
 
             decimal sizeMultiplier = (decimal)unitsUsed / 3;
 
-            // Calculate Price 
+            // Calculate Price
             decimal totalPrice = (decimal)Math.Ceiling(totalParkingTime.TotalHours) * _config.PricePerHour * sizeMultiplier;
 
             var receiptVM = new ReceiptViewModel
@@ -322,7 +322,7 @@ namespace Garage_2.Controllers
             };
 
             // Todo: try-catch här
-            // Pga cascade delete i GarageContext tas även tillhörande rader bort ur join-table:n VehicleSpot, vilket också frigör platserna i ParkingSpots 
+            // Pga cascade delete i GarageContext tas även tillhörande rader bort ur join-table:n VehicleSpot, vilket också frigör platserna i ParkingSpots
             _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 

@@ -16,6 +16,8 @@ namespace Garage_2.Models.ViewModels
 
         public string? SearchString { get; set; }
 
+        public string SearchField { get; set; } = string.Empty;
+
         public int TotalPages { get; set; }
 
         public int CurrentPage { get; set; }
