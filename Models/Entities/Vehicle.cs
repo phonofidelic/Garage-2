@@ -4,20 +4,22 @@
     {
         public int Id { get; set; }
 
-        public string RegistrationNumber { get; set; }
+        public string RegistrationNumber { get; set; } = default!;
 
-        public string Make { get; set; }
+        public string Make { get; set; } = default!;
 
-        public string Model { get; set; }
+        public string Model { get; set; } = default!;
 
         public int NumberOfWheels { get; set; }
 
+        public string Color { get; set; } = default!;
+
         public int VehicleTypeId { get; set; }
-        public VehicleType Type { get; set; }
+        public VehicleType VehicleType { get; set; } = default!;
 
-        public int ApplicationUserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public string ApplicationUserId { get; set; } = default!;
+        public ApplicationUser User { get; set; } = default!;
 
-        public ICollection<ParkingSession> ParkingSessions{ get; set; }
+        public ICollection<ParkingSession> ParkingSessions { get; set; } = new List<ParkingSession>();
     }
 }

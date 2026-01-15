@@ -6,12 +6,12 @@
 
         public int SpotNumber { get; set; }
 
-        public int CapacityUnits { get; set; }
+        public int CapacityUnits { get; set; } = 3;
 
         public bool IsBlocked { get; set; }
 
-        public ICollection<VehicleParking> VehicleParkings { get; set; }
+        public ICollection<VehicleParking> VehicleParkings { get; set; } = new List<VehicleParking>();
 
-        public ICollection<ParkingSession> ParkingSessions{ get; set; }
+        //public ICollection<ParkingSession> ParkingSessions{ get; set; }
     }
 }

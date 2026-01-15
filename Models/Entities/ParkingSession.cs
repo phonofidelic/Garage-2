@@ -1,20 +1,25 @@
-﻿namespace Garage_2.Models.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Garage_2.Models.Entities
 {
     public class ParkingSession
     {
         public int Id { get; set; }
 
         public int VehicleId { get; set; }
-        public Vehicle Vehicle { get; set; }
+
+        // Nav-prop
+        public Vehicle Vehicle { get; set; } = default!;
 
         public DateTime ArrivalTime { get; set; }
 
-        public DateTime DepartureTime { get; set; }
+        // Null = aktiv parkering
+        public DateTime? DepartureTime { get; set; }
 
-        public TimeSpan Duration { get => DepartureTime - ArrivalTime; }
+        [NotMapped]
+        public TimeSpan? Duration => DepartureTime - ArrivalTime;
 
-        public ICollection<VehicleParking> VehicleParkings { get; set; }
+        public ICollection<VehicleParking> VehicleParkings { get; set; } = new List<VehicleParking>();
 
-        public ICollection<ParkingSpotV2> ParkingSpots { get; set; }
     }
 }
