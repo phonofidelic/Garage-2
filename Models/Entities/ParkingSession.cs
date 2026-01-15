@@ -5,6 +5,7 @@
         public int Id { get; set; }
 
         public int VehicleId { get; set; }
+        public Vehicle Vehicle { get; set; }
 
         public DateTime ArrivalTime { get; set; }
 
@@ -12,6 +13,8 @@
 
         public TimeSpan Duration { get => DepartureTime - ArrivalTime; }
 
-        // ToDo: VehicleParkings
+        public ICollection<VehicleParking> VehicleParkings { get; set; }
+
+        public ICollection<ParkingSpotV2> ParkingSpots { get; set; }
     }
 }
