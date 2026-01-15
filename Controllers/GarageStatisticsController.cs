@@ -21,10 +21,10 @@ namespace Garage_2.Controllers
 
         public IActionResult GarageStatsOverview()
         {
-            int totalVehicles = _context.ParkedVehicle.Count();
-            int totalWheels = _context.ParkedVehicle.Sum(v => v.NumberOfWheels);
+            int totalVehicles = _context.Vehicles.Count();
+            int totalWheels = _context.Vehicles.Sum(v => v.NumberOfWheels);
 
-            var vehiclesGroupedByTypeDict = _context.ParkedVehicle.GroupBy(v => v.Type).Select(g => new { Type = g.Key, Count = g.Count() }).ToList();
+            var vehiclesGroupedByTypeDict = _context.Vehicles.GroupBy(v => v.VehicleType.Name).Select(g => new { Type = g.Key, Count = g.Count() }).ToList();
 
             List<VehicleTypeCountViewModel> vehiclesPerTypeList = new List<VehicleTypeCountViewModel>();
 
@@ -36,10 +36,10 @@ namespace Garage_2.Controllers
             DateTime now = DateTime.Now;
 
             // Pull only the time and units for each vehicle
-            var vehicleDataList = _context.ParkedVehicle.Select(v => new
+            var vehicleDataList = _context.ParkingSessions.Select(ps => new
             {
-                v.ArrivalTime,
-                Units = v.VehicleSpots.Sum(s => s.UnitsUsed)
+                ps.ArrivalTime,
+                Units = ps.VehicleParkings.Sum(vp => vp.UnitsUsed)
             }).ToList();
 
             decimal totalRevenue = 0;
@@ -57,7 +57,7 @@ namespace Garage_2.Controllers
             }
 
             //DateTime now = DateTime.Now;
-            var arrivalTimes = _context.ParkedVehicle.Select(v => v.ArrivalTime).ToList();
+            var arrivalTimes = _context.ParkingSessions.Select(p => p.ArrivalTime).ToList();
 
             double totalHours = 0;
 

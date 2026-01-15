@@ -16,7 +16,7 @@ namespace Garage_2.Models.Entities
         public int ParkingSpotV2Id { get; set; }
 
         // Nav-prop
-        public ParkingSpotV2 ParkingSpot { get; set; } = default!;
+        public ParkingSpotV2 ParkingSpotV2 { get; set; } = default!;
 
         // 1...3 (tredjedelar av en parking spot)
         [Range(1, 3)]

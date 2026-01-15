@@ -1,7 +1,6 @@
 using Garage_2.Data;
 using Garage_2.Interfaces;
 using Garage_2.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Services;
 
@@ -17,7 +16,7 @@ public class ParkingService : IParkingService
     public async Task<ParkingResult> ParkVehicleAsync(ParkedVehicle parkedVehicle)
     {
         // Add the vehicle first to get an Id
-        _context.ParkedVehicle.Add(parkedVehicle);
+        _context.Vehicles.Add(parkedVehicle);
         await _context.SaveChangesAsync();
 
         bool parkingSpotAssigned = false;

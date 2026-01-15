@@ -2,7 +2,7 @@
 {
     public class VehicleTypeCountViewModel
     {
-        public VehicleType Type { get; set; }
+        public string Type { get; set; } = "";
         public int Count { get; set; }
     }
 
