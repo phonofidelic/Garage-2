@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Garage_2.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class ParkedVehiclesController : Controller
     {
         private readonly GarageContext _context;
