@@ -1,6 +1,6 @@
 ﻿namespace Garage_2.Models.Entities
 {
-    public class ParkingSpot
+    public class ParkingSpotV2
     {
         public int Id { get; set; }
 
@@ -11,5 +11,7 @@
         public bool IsBlocked { get; set; }
 
         public ICollection<VehicleParking> VehicleParkings { get; set; }
+
+        public ICollection<ParkingSession> ParkingSessions{ get; set; }
     }
 }
