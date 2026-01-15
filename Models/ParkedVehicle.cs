@@ -41,7 +41,7 @@ namespace Garage_2.Models
         public DateTime ArrivalTime { get; set; }
 
         [Required]
-        public VehicleType Type { get; set; }
+        public VehicleTypeEnum Type { get; set; }
 
         // 1:M relation till p-platser via en join-tabell
         public ICollection<VehicleSpot> VehicleSpots { get; set; } = new List<VehicleSpot>();

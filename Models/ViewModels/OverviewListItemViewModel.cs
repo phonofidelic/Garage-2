@@ -6,7 +6,7 @@ namespace Garage_2.Models.ViewModels
     {
         public int Id { get; set; }
 
-        public VehicleType Type { get; set; }
+        public VehicleTypeEnum Type { get; set; }
 
         [Display(Name = "Registration number")]
         public string RegistrationNumber { get; set; } = default!;

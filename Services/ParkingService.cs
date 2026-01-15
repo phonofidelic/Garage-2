@@ -23,31 +23,53 @@ public class ParkingService : IParkingService
         bool parkingSpotAssigned = false;
 
         // Get all spots with usage information
-        IQueryable<ParkingSpotWithUnits> spotsWithUsage = _context.ParkingSpots.Select(spot => new ParkingSpotWithUnits
+        IQueryable<ParkingSpotWithUnits> spotsWithUsage = _context.ParkingSpotsV2.Select(spot => new ParkingSpotWithUnits
         {
             Spot = spot,
             UsedUnits = spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0,
             FreeUnits = spot.CapacityUnits - (spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0)
         });
 
-        int unitsNeeded = GetUnitsForVehicle(vehicle.VehicleType.SizeInUnits);
+        int unitsNeeded = vehicle.VehicleType.SizeInUnits;
+
+        // ToDo: Implement for new Vehicle entity
+        throw new NotImplementedException();
+    }
+
+    public async Task<ParkingResult> ParkVehicleAsync(ParkedVehicle vehicle)
+    {
+        // Add the vehicle first to get an Id
+        _context.ParkedVehicles.Add(vehicle);
+        await _context.SaveChangesAsync();
+
+        bool parkingSpotAssigned = false;
+
+        // Get all spots with usage information
+        IQueryable<ParkingSpotWithUnits> spotsWithUsage = _context.ParkingSpotsV2.Select(spot => new ParkingSpotWithUnits
+        {
+            Spot = spot,
+            UsedUnits = spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0,
+            FreeUnits = spot.CapacityUnits - (spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0)
+        });
+
+        int unitsNeeded = GetUnitsForVehicleTypeEnum(vehicle.Type);
 
         // Attempt to assign parking spot(s) based on vehicle type
         switch (vehicle.Type)
         {
-            case VehicleType.Motorcycle:
+            case VehicleTypeEnum.Motorcycle:
                 parkingSpotAssigned = await AssignMotorcycleSpotAsync(vehicle, spotsWithUsage, unitsNeeded);
                 break;
 
-            case VehicleType.Car:
+            case VehicleTypeEnum.Car:
                 parkingSpotAssigned = await AssignCarSpotAsync(vehicle, spotsWithUsage, unitsNeeded);
                 break;
 
-            case VehicleType.Bus:
+            case VehicleTypeEnum.Bus:
                 parkingSpotAssigned = await AssignBusSpotAsync(vehicle, spotsWithUsage);
                 break;
 
-            case VehicleType.Boat:
+            case VehicleTypeEnum.Boat:
                 parkingSpotAssigned = await AssignBoatSpotAsync(vehicle, spotsWithUsage);
                 break;
         }
@@ -55,7 +77,7 @@ public class ParkingService : IParkingService
         if (!parkingSpotAssigned)
         {
             // Remove the vehicle if no parking spot could be assigned
-            _context.ParkedVehicle.Remove(vehicle);
+            _context.ParkedVehicles.Remove(vehicle);
             await _context.SaveChangesAsync();
 
             return new ParkingResult
@@ -174,19 +196,19 @@ public class ParkingService : IParkingService
         return false;
     }
 
-    private int GetUnitsForVehicle(VehicleType type)
+    private int GetUnitsForVehicleTypeEnum(VehicleTypeEnum type)
     {
         return type switch
         {
-            VehicleType.Motorcycle => 1,
-            VehicleType.Car => 3,
-            VehicleType.Bus => 6,
-            VehicleType.Boat => 9,
+            VehicleTypeEnum.Motorcycle => 1,
+            VehicleTypeEnum.Car => 3,
+            VehicleTypeEnum.Bus => 6,
+            VehicleTypeEnum.Boat => 9,
             _ => throw new NotImplementedException($"Vehicle type {type} is not supported.")
         };
     }
 
-    private List<ParkingSpot>? FindConsecutiveSpots(List<ParkingSpot> freeSpots, int requiredSpots)
+    private List<ParkingSpotV2>? FindConsecutiveSpots(List<ParkingSpotV2> freeSpots, int requiredSpots)
     {
         for (int i = 0; i <= freeSpots.Count - requiredSpots; i++)
         {
@@ -200,4 +222,6 @@ public class ParkingService : IParkingService
         }
         return null;
     }
+
+    
 }

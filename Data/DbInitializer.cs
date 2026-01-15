@@ -14,8 +14,8 @@ namespace Garage_2.Data
 
             // Fyll bara på med seed-data om db är tom (dvs ingen överskrivning av befintligt data)
 
-            if (!context.ParkedVehicle.Any())
-                context.ParkedVehicle.AddRange(parkedVehiclesList);
+            if (!context.ParkedVehicles.Any())
+                context.ParkedVehicles.AddRange(parkedVehiclesList);
 
             if (!context.ParkingSpots.Any())
                 context.ParkingSpots.AddRange(ParkingSpotsList());
@@ -23,7 +23,7 @@ namespace Garage_2.Data
             context.SaveChanges();
 
             // Endast om data finns i både ParkedVehicle och ParkingSpots kan join-tabellen fyllas med relationer
-            if (context.ParkingSpots.Any() && context.ParkedVehicle.Any())
+            if (context.ParkingSpots.Any() && context.ParkedVehicles.Any())
             {
                 SeedVehicleSpots(context);
             }
@@ -41,7 +41,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Red",
                     Make = "Volvo",
                     Model = "XC60",
@@ -52,7 +52,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Black",
                     Make = "BMW",
                     Model = "320i",
@@ -63,7 +63,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "White",
                     Make = "Tesla",
                     Model = "Model 3",
@@ -74,7 +74,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Motorcycle,
+                    Type = VehicleTypeEnum.Motorcycle,
                     Color = "Black",
                     Make = "Yamaha",
                     Model = "MT-07",
@@ -85,7 +85,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Motorcycle,
+                    Type = VehicleTypeEnum.Motorcycle,
                     Color = "Blue",
                     Make = "Honda",
                     Model = "CBR600RR",
@@ -96,7 +96,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Silver",
                     Make = "Audi",
                     Model = "A6",
@@ -107,7 +107,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Green",
                     Make = "Volkswagen",
                     Model = "Golf",
@@ -118,7 +118,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Bus,
+                    Type = VehicleTypeEnum.Bus,
                     Color = "Yellow",
                     Make = "Scania",
                     Model = "Citywide",
@@ -129,7 +129,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Bus,
+                    Type = VehicleTypeEnum.Bus,
                     Color = "Blue",
                     Make = "Volvo",
                     Model = "7900 Electric",
@@ -140,7 +140,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Boat,
+                    Type = VehicleTypeEnum.Boat,
                     Color = "White",
                     Make = "Nimbus",
                     Model = "27 Nova",
@@ -151,7 +151,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Boat,
+                    Type = VehicleTypeEnum.Boat,
                     Color = "Blue",
                     Make = "Yamarin",
                     Model = "63 DC",
@@ -162,7 +162,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Gray",
                     Make = "Toyota",
                     Model = "Corolla",
@@ -173,7 +173,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Blue",
                     Make = "Ford",
                     Model = "Focus",
@@ -184,7 +184,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Motorcycle,
+                    Type = VehicleTypeEnum.Motorcycle,
                     Color = "Red",
                     Make = "Ducati",
                     Model = "Monster",
@@ -195,7 +195,7 @@ namespace Garage_2.Data
 
                 vehicles.Add(new ParkedVehicle
                 {
-                    Type = VehicleType.Car,
+                    Type = VehicleTypeEnum.Car,
                     Color = "Black",
                     Make = "Mercedes-Benz",
                     Model = "C220",
@@ -235,7 +235,7 @@ namespace Garage_2.Data
                     .OrderBy(s => s.SpotNumber)
                     .ToList();
 
-                var vehicles = context.ParkedVehicle
+                var vehicles = context.ParkedVehicles
                     .OrderBy(v => v.Id)
                     .ToList();
 
@@ -248,16 +248,16 @@ namespace Garage_2.Data
 
                     switch (vehicle.Type)
                     {
-                        case VehicleType.Motorcycle:
+                        case VehicleTypeEnum.Motorcycle:
                             unitsRequired = 1;
                             break;
-                        case VehicleType.Car:
+                        case VehicleTypeEnum.Car:
                             unitsRequired = 3;
                             break;
-                        case VehicleType.Bus:
+                        case VehicleTypeEnum.Bus:
                             unitsRequired = 6;
                             break;
-                        case VehicleType.Boat:
+                        case VehicleTypeEnum.Boat:
                             unitsRequired = 9;
                             break;
                         default:

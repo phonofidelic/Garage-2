@@ -37,6 +37,6 @@ namespace Garage_2.Models.ViewModels
         public DateTime ArrivalTime { get; set; }
 
         [Required]
-        public VehicleType Type { get; set; }
+        public VehicleTypeEnum Type { get; set; }
     }
 }

@@ -47,7 +47,7 @@ public class VehicleSearchService : IVehicleSearchService
 
     private IQueryable<ParkedVehicle> FilterByType(IQueryable<ParkedVehicle> query, string search)
     {
-        var matchingTypes = Enum.GetValues<VehicleType>()
+        var matchingTypes = Enum.GetValues<VehicleTypeEnum>()
             .Where(t => t.ToString().Contains(search, StringComparison.OrdinalIgnoreCase))
             .ToList();
 

@@ -34,7 +34,7 @@ namespace Garage_2.Controllers
             [FromQuery(Name = "page")] int page = 1)
         {
             // Start with all vehicles and apply smart search
-            var query = _searchService.Search(_context.ParkedVehicle, searchString, searchField);
+            var query = _searchService.Search(_context.ParkedVehicles, searchString, searchField);
 
             // Execute the query, put the data into overviewmodel and return view
             var now = DateTime.Now;
@@ -117,7 +117,7 @@ namespace Garage_2.Controllers
 
             //var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(m => m.Id == id);
 
-            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
+            var parkedVehicle = await _context.ParkedVehicles.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
@@ -188,7 +188,7 @@ namespace Garage_2.Controllers
             }
 
             // Retrieve the parked vehicle by id.
-            var parkedVehicle = await _context.ParkedVehicle.FindAsync(id);
+            var parkedVehicle = await _context.ParkedVehicles.FindAsync(id);
             if (parkedVehicle == null)
             {
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
@@ -227,7 +227,7 @@ namespace Garage_2.Controllers
                 try
                 {
                     // Fetch the entity to update
-                    var parkedVehicle = await _context.ParkedVehicle.FirstOrDefaultAsync(p => p.Id == id);
+                    var parkedVehicle = await _context.ParkedVehicles.FirstOrDefaultAsync(p => p.Id == id);
 
                     if (parkedVehicle == null)
                     {
@@ -275,7 +275,7 @@ namespace Garage_2.Controllers
             }
 
             // Hämta fordonet till vyn, inkludera join-tabell med relationerna till p-plaser, samt p-platserna själva
-            var parkedVehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
+            var parkedVehicle = await _context.ParkedVehicles.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (parkedVehicle == null)
             {
@@ -292,7 +292,7 @@ namespace Garage_2.Controllers
         public async Task<IActionResult> UnparkConfirmed(int id)
         {
             // Hämta vehicle med tillhörande ParkingSpot(s) i nav-property, via join-table:n VehicleSpots
-            var vehicle = await _context.ParkedVehicle.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
+            var vehicle = await _context.ParkedVehicles.Include(v => v.VehicleSpots).ThenInclude(vs => vs.ParkingSpot).FirstOrDefaultAsync(v => v.Id == id);
 
             if (vehicle == null)
             {
@@ -323,7 +323,7 @@ namespace Garage_2.Controllers
 
             // Todo: try-catch här
             // Pga cascade delete i GarageContext tas även tillhörande rader bort ur join-table:n VehicleSpot, vilket också frigör platserna i ParkingSpots
-            _context.ParkedVehicle.Remove(vehicle);
+            _context.ParkedVehicles.Remove(vehicle);
             await _context.SaveChangesAsync();
 
             SetAlertInTempData(AlertType.success, $"Vehicle with RegNo: {receiptVM.RegistrationNumber} has been checked out.");
@@ -338,12 +338,12 @@ namespace Garage_2.Controllers
 
         private bool ParkedVehicleExists(int id)
         {
-            return _context.ParkedVehicle.Any(e => e.Id == id);
+            return _context.ParkedVehicles.Any(e => e.Id == id);
         }
 
         private bool VehicleRegistrationExists(string registrationNumger)
         {
-            return _context.ParkedVehicle.Any(vehicle => vehicle.RegistrationNumber == registrationNumger);
+            return _context.ParkedVehicles.Any(vehicle => vehicle.RegistrationNumber == registrationNumger);
         }
 
         private void SetAlertInTempData(AlertType type, string message)
