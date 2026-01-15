@@ -1,0 +1,45 @@
+﻿@model IEnumerable<Garage_2.Models.Entities.ParkingSpotV2>
+
+@{
+    ViewData["Title"] = "Manage Spots";
+}
+
+<h1>Parking spots</h1>
+
+<a asp-action="Create" class="btn btn-primary">Create new parking spot</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Parking number</th>
+            <th>Status</th>
+            <th>Capacity</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.SpotNumber</td>
+
+                <td>
+                    @if (item.IsBlocked)
+                    {
+                        <span style="color:red; font-weight:bold;">Blocked</span>
+                    }
+                    else
+                    {
+                        <span>Open</span>
+                    }
+                </td>
+
+                <td>@item.CapacityUnits</td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
