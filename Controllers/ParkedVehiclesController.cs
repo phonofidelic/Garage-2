@@ -2,12 +2,14 @@
 using Garage_2.Interfaces;
 using Garage_2.Models;
 using Garage_2.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Garage_2.Controllers
 {
+    [Authorize]
     public class ParkedVehiclesController : Controller
     {
         private readonly GarageContext _context;
