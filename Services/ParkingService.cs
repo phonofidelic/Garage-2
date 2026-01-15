@@ -1,6 +1,7 @@
 using Garage_2.Data;
 using Garage_2.Interfaces;
 using Garage_2.Models;
+using Garage_2.Models.Entities;
 
 namespace Garage_2.Services;
 
@@ -13,10 +14,10 @@ public class ParkingService : IParkingService
         _context = context;
     }
 
-    public async Task<ParkingResult> ParkVehicleAsync(ParkedVehicle parkedVehicle)
+    public async Task<ParkingResult> ParkVehicleAsync(Vehicle vehicle)
     {
         // Add the vehicle first to get an Id
-        _context.Vehicles.Add(parkedVehicle);
+        _context.Vehicles.Add(vehicle);
         await _context.SaveChangesAsync();
 
         bool parkingSpotAssigned = false;
@@ -25,36 +26,36 @@ public class ParkingService : IParkingService
         IQueryable<ParkingSpotWithUnits> spotsWithUsage = _context.ParkingSpots.Select(spot => new ParkingSpotWithUnits
         {
             Spot = spot,
-            UsedUnits = spot.VehicleSpots.Sum(vs => (int?)vs.UnitsUsed) ?? 0,
-            FreeUnits = spot.CapacityUnits - (spot.VehicleSpots.Sum(vs => (int?)vs.UnitsUsed) ?? 0)
+            UsedUnits = spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0,
+            FreeUnits = spot.CapacityUnits - (spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0)
         });
 
-        int unitsNeeded = GetUnitsForVehicle(parkedVehicle.Type);
+        int unitsNeeded = GetUnitsForVehicle(vehicle.VehicleType.SizeInUnits);
 
         // Attempt to assign parking spot(s) based on vehicle type
-        switch (parkedVehicle.Type)
+        switch (vehicle.Type)
         {
             case VehicleType.Motorcycle:
-                parkingSpotAssigned = await AssignMotorcycleSpotAsync(parkedVehicle, spotsWithUsage, unitsNeeded);
+                parkingSpotAssigned = await AssignMotorcycleSpotAsync(vehicle, spotsWithUsage, unitsNeeded);
                 break;
 
             case VehicleType.Car:
-                parkingSpotAssigned = await AssignCarSpotAsync(parkedVehicle, spotsWithUsage, unitsNeeded);
+                parkingSpotAssigned = await AssignCarSpotAsync(vehicle, spotsWithUsage, unitsNeeded);
                 break;
 
             case VehicleType.Bus:
-                parkingSpotAssigned = await AssignBusSpotAsync(parkedVehicle, spotsWithUsage);
+                parkingSpotAssigned = await AssignBusSpotAsync(vehicle, spotsWithUsage);
                 break;
 
             case VehicleType.Boat:
-                parkingSpotAssigned = await AssignBoatSpotAsync(parkedVehicle, spotsWithUsage);
+                parkingSpotAssigned = await AssignBoatSpotAsync(vehicle, spotsWithUsage);
                 break;
         }
 
         if (!parkingSpotAssigned)
         {
             // Remove the vehicle if no parking spot could be assigned
-            _context.ParkedVehicle.Remove(parkedVehicle);
+            _context.ParkedVehicle.Remove(vehicle);
             await _context.SaveChangesAsync();
 
             return new ParkingResult
