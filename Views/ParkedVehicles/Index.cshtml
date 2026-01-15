@@ -153,6 +153,7 @@
            asp-route-sortBy="@Model.SortBy"
            asp-route-order="@Model.SortOrder"
            asp-route-searchString="@Model.SearchString"
+           asp-route-searchField="@Model.SearchField"
            asp-route-page="@i"
            class="btn btn-sm @(i == Model.CurrentPage ? "btn-primary" : "btn-outline-primary")">
             @i
@@ -168,13 +169,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p><strong>Text Search:</strong> Search by registration number, make, model, or color.</p>
-                <hr />
-                <p><strong>Search by commands:</strong></p>
+                <p><strong>Search by field:</strong></p>
                 <ul class="list-unstyled">
-                    <li><code>w(4)</code> – Filter by number of wheels</li>
-                    <li><code>t(car)</code> – Filter by vehicle type</li>
-                    <li><code>d(2025-12-19)</code> – Filter by arrival time</li>
+                    <li><strong>All Fields:</strong> Search by registration number, make, model, or color</li>
+                    <li><strong>Wheels:</strong> Enter number (e.g., 4)</li>
+                    <li><strong>Type:</strong> Enter vehicle type (e.g., car, motorcycle)</li>
+                    <li><strong>Arrival Date:</strong> Enter date (e.g., 2025-01-15)</li>
                 </ul>
             </div>
         </div>

@@ -4,6 +4,14 @@
     <div class="d-flex gap-2 justify-content-end align-items-center">
         <input type="hidden" name="sortBy" value="@Model.SortBy" />
         <input type="hidden" name="order" value="@Model.SortOrder" />
+
+        <select name="searchField" class="form-select" style="max-width: 150px;">
+            <option value="">All Fields</option>
+            <option value="wheels" selected="@(Model.SearchField == "wheels")">Wheels</option>
+            <option value="type" selected="@(Model.SearchField == "type")">Type</option>
+            <option value="date" selected="@(Model.SearchField == "date")">Arrival Date</option>
+        </select>
+
         <input type="text" name="searchString" value="@Model.SearchString"
                class="form-control" style="max-width: 250px;"
                placeholder="Search vehicles..." />
