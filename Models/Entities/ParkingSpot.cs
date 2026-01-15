@@ -9,5 +9,7 @@
         public int CapacityUnits { get; set; }
 
         public bool IsBlocked { get; set; }
+
+        public ICollection<VehicleParking> VehicleParkings { get; set; }
     }
 }
