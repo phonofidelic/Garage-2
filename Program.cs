@@ -1,4 +1,4 @@
-﻿using Garage_2;
+using Garage_2;
 using Garage_2.Data;
 using Garage_2.Interfaces;
 using Garage_2.Services;
@@ -7,9 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using System.Configuration;
+using Microsoft.AspNetCore.Identity;
+using Garage_2.Models.Entities;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<GarageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GarageContext") ?? throw new InvalidOperationException("Connection string 'GarageContext' not found.")));
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<GarageContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
