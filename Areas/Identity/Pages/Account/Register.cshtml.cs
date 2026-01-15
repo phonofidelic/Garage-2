@@ -98,6 +98,11 @@ namespace Garage_2.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            [RegularExpression(@"\d{8}-\d{4}", ErrorMessage = "Identification number must be 10 digits. Your date of birth + last four digits YYYYMMDD-NNNN")]
+            [Display(Name = "SSN")]
+            public string SSN { get; set; }
         }
 
 
@@ -111,9 +116,20 @@ namespace Garage_2.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            
+            var match = _userManager.Users.Any(u => u.SSN == Input.SSN);
+            if (match)
+            {
+                ModelState.AddModelError(nameof(Input.SSN), errorMessage: "Account already exists");
+            }
+            
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                user.SSN = Input.SSN;
+                // ToDo: replace mocks with input data
+                user.FirstName = "Test";
+                user.LastName = "User";
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
