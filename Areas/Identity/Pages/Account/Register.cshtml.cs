@@ -81,6 +81,13 @@ namespace Garage_2.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Required]
+            [Display(Name = "First name")]
+            public string FirstName { get; set; }
+            [Required]
+            [Display(Name = "Last name")]
+            public string LastName { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -118,6 +125,11 @@ namespace Garage_2.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+            if (string.Equals(Input.FirstName, Input.LastName, StringComparison.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError("Input.FirstName", "FirstName and Lastname must not be the same.");
+            }
+
             var match = _userManager.Users.Any(u => u.SSN == Input.SSN);
             if (match)
             {
@@ -128,9 +140,8 @@ namespace Garage_2.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
                 user.SSN = Input.SSN;
-                // ToDo: replace mocks with input data
-                user.FirstName = "Test";
-                user.LastName = "User";
+                user.FirstName = Input.FirstName;
+                user.LastName = Input.LastName;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
