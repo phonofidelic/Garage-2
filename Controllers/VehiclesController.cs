@@ -85,7 +85,9 @@ namespace Garage_2.Controllers
                 ParkedTime = v.ParkingSessions
                     .Where(ps => ps.DepartureTime == null)
                     .Select(ps => (TimeSpan?)(now - ps.ArrivalTime))
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+
+                ActiveSession = v.ParkingSessions.Where(ps => ps.DepartureTime == null).FirstOrDefault()
             });
 
             sortBy ??= OverviewSortBy.ArrivalTime;

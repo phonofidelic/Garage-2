@@ -73,21 +73,6 @@
                 }
             </th>
             <th td class="text-nowrap">
-                <a
-                    asp-controller="Vehicles"
-                    asp-action="Index"
-                    asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
-                    asp-route-order="@GetSortOrder(OverviewSortBy.ArrivalTime)"
-                    asp-route-searchString="@Model.SearchString"
-                    asp-route-page="@Model.CurrentPage">
-                    @Html.DisplayNameFor(model => model.OverviewItem.ArrivalTime)
-                </a>
-                @if (Model.SortBy == OverviewSortBy.ArrivalTime)
-                {
-                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
-                }
-            </th>
-            <th td class="text-nowrap">
                 <a asp-controller="Vehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.Type)"
@@ -97,6 +82,20 @@
                     @Html.DisplayNameFor(model => model.OverviewItem.Type)
                 </a>
                 @if (Model.SortBy == OverviewSortBy.Type)
+                {
+                    <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
+                }
+            </th>
+            <th td class="text-nowrap">
+                <a asp-controller="Vehicles"
+                   asp-action="Index"
+                   asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
+                   asp-route-order="@GetSortOrder(OverviewSortBy.ArrivalTime)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-page="@Model.CurrentPage">
+                    @Html.DisplayNameFor(model => model.OverviewItem.ArrivalTime)
+                </a>
+                @if (Model.SortBy == OverviewSortBy.ArrivalTime)
                 {
                     <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
                 }
@@ -124,20 +123,30 @@
             <td class="text-nowrap">
                 @Html.DisplayFor(modelItem => item.RegistrationNumber)
             </td>
-                <td class="text-nowrap">
-                @Html.DisplayFor(modelItem => item.ArrivalTime)
-            </td>
-                <td class="text-nowrap">
+            <td class="text-nowrap">
                 @Html.DisplayFor(modelItem => item.Type)
             </td>
-                <td class="text-nowrap">
+            <td class="text-nowrap">
+                @Html.DisplayFor(modelItem => item.ArrivalTime)
+            </td>
+            <td class="text-nowrap">
                @*  @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m") *@
             </td>
             <td>
                 <div class="d-flex flex-nowrap gap-2">
                     <a asp-action="Details" asp-route-id="@item.Id" asp-route-searchString="@Model.SearchString" class="btn btn-sm btn-outline-secondary text-nowrap">Details</a>
                     <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary text-nowrap">Edit</a>
-                    <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-nowrap">Check out</a>
+                        @if (item.IsParked)
+                        {
+                            <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-nowrap">Check out</a>
+                        } else
+                        {
+                            <form asp-action="ParkVehicle" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-success">Park</button>
+                            </form>
+                        }
+
                 </div>
             </td>
         </tr>
