@@ -48,7 +48,9 @@ namespace Garage_2.Controllers
                 .AsNoTracking()
                 .Where(v => v.ApplicationUserId == userId)
                 .Include(v => v.VehicleType)
-                .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null)); // aktiv session (max 1)
+                .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null)) // aktiv session (max 1)
+                .ThenInclude(ps => ps.VehicleParkings)
+                .ThenInclude(vp => vp.ParkingSpotV2);
 
             query = _searchService.Search(query, searchString, searchField);
 
@@ -68,7 +70,14 @@ namespace Garage_2.Controllers
                 ParkedTime = v.ParkingSessions
                     .Where(ps => ps.DepartureTime == null)
                     .Select(ps => (TimeSpan?)(now - ps.ArrivalTime))
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+
+                ParkingSpots = string.Join(", ", v.ParkingSessions
+                    .Where(ps => ps.DepartureTime == null)
+                    .SelectMany(ps => ps.VehicleParkings)
+                    .OrderBy(vp => vp.ParkingSpotV2.SpotNumber)
+                    .Select(vp => vp.ParkingSpotV2.SpotNumber)
+    )
             });
 
             sortBy ??= OverviewSortBy.ArrivalTime;
@@ -146,6 +155,76 @@ namespace Garage_2.Controllers
             return View(new DetailsViewModel(vehicle, activeSession));
         }
 
+        // GET: Vehicles/Edit/5
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var vehicle = await _context.Vehicles
+                .AsNoTracking()
+                .Include(v => v.VehicleType)
+                .Include(v => v.ParkingSessions)
+                .FirstOrDefaultAsync(v => v.Id == id && v.ApplicationUserId == userId);
+
+            if (vehicle is null)
+                return NotFound();
+
+            var activeSession = vehicle.ParkingSessions
+                .FirstOrDefault(p => p.DepartureTime == null);
+
+            var vm = new EditVehicleViewModel
+            {
+                Id = vehicle.Id,
+                RegistrationNumber = vehicle.RegistrationNumber,
+                Make = vehicle.Make,
+                Model = vehicle.Model,
+                NumberOfWheels = vehicle.NumberOfWheels,
+                Color = vehicle.Color,
+                VehicleTypeName = vehicle.VehicleType.Name,
+                ArrivalTime = activeSession?.ArrivalTime
+            };
+
+            return View(vm);
+        }
+
+        // POST: Vehicles/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditVehicleViewModel vm)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            var vehicle = await _context.Vehicles
+                .FirstOrDefaultAsync(v => v.Id == vm.Id && v.ApplicationUserId == userId);
+
+            if (vehicle is null)
+                return NotFound();
+
+            // Uppdatera endast fält du vill tillåta
+            vehicle.Make = vm.Make;
+            vehicle.Model = vm.Model;
+            vehicle.NumberOfWheels = vm.NumberOfWheels;
+            vehicle.Color = vm.Color;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Om du har en concurrency-token (RowVersion) kan du hantera “någon annan ändrade”
+                // Annars är detta oftast överkurs och kan bara rethrowas eller hanteras med generiskt fel
+                throw;
+            }
+
+            SetAlertInTempData(AlertType.success, $"Vehicle {vehicle.RegistrationNumber} edited.");
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: Vehicles/RegisterVehicle
         public async Task<IActionResult> RegisterVehicle()
         {
@@ -213,9 +292,9 @@ namespace Garage_2.Controllers
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            // Säkerställ ägarskap (billig kontroll)
+            // Säkerställ ägarskap
             var vehicle = await _context.Vehicles
-                .Include(v => v.VehicleType) // om din ParkingService använder VehicleType
+                .Include(v => v.VehicleType)
                 .FirstOrDefaultAsync(v => v.Id == id && v.ApplicationUserId == userId);
 
             if (vehicle is null)
@@ -232,7 +311,25 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            SetAlertInTempData(AlertType.success, $"Vehicle {vehicle.RegistrationNumber} parked.");
+            // Läs tillbaka aktiva sessionen + spots 
+            var activeSession = await _context.ParkingSessions
+                .AsNoTracking()
+                .Where(ps => ps.VehicleId == id && ps.DepartureTime == null)
+                .Include(ps => ps.VehicleParkings)
+                    .ThenInclude(vp => vp.ParkingSpotV2)
+                .SingleAsync(); // borde vara exakt 1 pga unique filter index
+
+            var spotNumbers = activeSession.VehicleParkings
+                .Select(vp => vp.ParkingSpotV2.SpotNumber)
+                .OrderBy(n => n)
+                .ToList();
+
+            SetAlertInTempData(
+                AlertType.success,
+                $"Vehicle {vehicle.RegistrationNumber} parked at parking spot #: {string.Join(", ", spotNumbers)}."
+            );
+
+
             return RedirectToAction(nameof(Index));
         }
 

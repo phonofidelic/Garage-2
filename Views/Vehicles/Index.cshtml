@@ -35,9 +35,16 @@
     </div>
 }
 
+
+
 <div
     class="position-fixed bg-body start-0 end-0 z-1"
     style="top: 48px; @@media (min-width: 768px) { top: 57px }">
+
+    <div class="container p-3 m">
+            <h4>Register vehicle</h4>
+    </div>
+   
     <div class="container d-flex p-3 px-4 gap-2">
         <div>
             <a asp-action="RegisterVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Register
@@ -45,7 +52,7 @@
             </a>
         </div>
         <div class="d-none d-sm-flex text-nowrap align-items-center gap-1">
-            Parked vehicles: @Model.Count
+            Registered vehicles: @Model.Count   
         </div>
         <div class="d-flex flex-grow-1 justify-content-end">
             <partial name="_SearchPartial" />
@@ -53,14 +60,14 @@
     </div>
 </div>
 
-<table class="table table-striped" style="margin-top: 108px">
+<table class="table table-striped" style="margin-top: 208px">
     <thead
         class="position-sticky w-100 bg-body p-3 h-100 mt-0 z-2"
            style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
             <th td class="text-nowrap">
                 <a
-                    asp-controller="ParkedVehicles"
+                    asp-controller="Vehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)"
                     asp-route-order="@GetSortOrder(OverviewSortBy.RegistrationNumber)"
@@ -75,7 +82,7 @@
             </th>
             <th td class="text-nowrap">
                 <a
-                    asp-controller="ParkedVehicles"
+                    asp-controller="Vehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
                     asp-route-order="@GetSortOrder(OverviewSortBy.ArrivalTime)"
@@ -89,7 +96,7 @@
                 }
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles"
+                <a asp-controller="Vehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.Type)"
                    asp-route-order="@GetSortOrder(OverviewSortBy.Type)"
@@ -103,7 +110,7 @@
                 }
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles"
+                <a asp-controller="Vehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.ParkedTime)"
                    asp-route-order="@GetSortOrder(OverviewSortBy.ParkedTime)"
@@ -116,6 +123,11 @@
                     <div class="text-primary" style="@GetSortOrderIndicatorStyle()">&#9650;</div>
                 }
             </th>
+
+            <th td class="text-nowrap">
+                <span class="text-primary">Parking spot #</span>
+            </th>
+
             <th></th>
         </tr>
     </thead>
@@ -123,22 +135,68 @@
 @foreach (var item in Model.OverviewList) {
         <tr>
             <td class="text-nowrap">
-                @Html.DisplayFor(modelItem => item.RegistrationNumber)
+      
+                    <spanclass class="font-monospace" style="display:inline-block; width: 90px;">
+                       
+                    @item.RegistrationNumber
+                </spanclass>
+
+                    @if (item.ArrivalTime is not null)
+                    {
+                        <span class="badge bg-secondary">Parked</span>
+                    }
+               
             </td>
-                <td class="text-nowrap">
-                @Html.DisplayFor(modelItem => item.ArrivalTime)
+            <td class="text-nowrap">
+               @if (item.ArrivalTime is null)
+               {
+                  <span>-</span>
+               }
+               else
+               {
+                
+                 @Html.DisplayFor(modelItem => item.ArrivalTime)
+               }                    
             </td>
                 <td class="text-nowrap">
                 @Html.DisplayFor(modelItem => item.Type)
             </td>
                 <td class="text-nowrap">
-               @*  @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m") *@
+                    @if (item.ArrivalTime is null)
+                    {
+                        <span>-</span>
+                    }
+                    else
+                    {
+                        var duration = DateTime.Now - item.ArrivalTime.Value;
+
+                        <span>
+                            @($"{duration.Days}d {duration.Hours}h {duration.Minutes}m")
+                        </span>
+                    }                  
+            </td>
+            <td class="text-nowrap">
+               @(string.IsNullOrWhiteSpace(item.ParkingSpots) ? "-" : item.ParkingSpots)
             </td>
             <td>
                 <div class="d-flex flex-nowrap gap-2">
-                    <a asp-action="Details" asp-route-id="@item.Id" asp-route-searchString="@Model.SearchString" class="btn btn-sm btn-outline-secondary text-nowrap">Details</a>
-                    <a asp-action="EditVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary text-nowrap">Edit</a>
-                    <a asp-action="UnParkVehicle" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-nowrap">Check out</a>
+
+                        <a asp-action="Details" asp-route-id="@item.Id" asp-route-searchString="@Model.SearchString" class="btn btn-sm btn-outline-secondary text-nowrap">Details</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary text-nowrap">Edit</a>
+
+                        @if (item.ArrivalTime is null)  // Saknas arrival time är fordomet ej parkerat
+                        {
+                            <form asp-action="ParkVehicle" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-success btn-outline btn-sm text-nowrap">Park</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary btn-outline btn-sm text-nowrap" asp-action="UnparkVehicle" asp-route-id="@item.Id">Check out</a>
+                        }
+
+                        
                 </div>
             </td>
         </tr>

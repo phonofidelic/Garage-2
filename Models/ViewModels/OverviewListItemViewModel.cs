@@ -11,10 +11,12 @@ namespace Garage_2.Models.ViewModels
         [Display(Name = "Registration number")]
         public string RegistrationNumber { get; set; } = default!;
 
-        [Display(Name = "Arrival time")]
+        [Display(Name = "Parking start time")]
         public DateTime? ArrivalTime { get; set; }
 
         [Display(Name = "Parked time")]
         public TimeSpan? ParkedTime { get; set; }
+
+        public string ParkingSpots { get; set; } = "-"; // Tex "12", "12, 13", "12–14"
     }
 }

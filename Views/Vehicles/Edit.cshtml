@@ -1,0 +1,152 @@
+﻿@model Garage_2.Models.ViewModels.EditVehicleViewModel
+
+@{
+    ViewData["Title"] = "EditVehicle";
+}
+
+<h4>Edit Vehicle</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="Id" />
+
+            <!-- Behåll read-only info vid postback -->
+            <input type="hidden" asp-for="RegistrationNumber" />
+            <input type="hidden" asp-for="VehicleTypeName" />
+            <input type="hidden" asp-for="ArrivalTime" />
+
+            <div class="form-group">
+                <label class="control-label fw-bold">Registration Number</label>
+                <div class="form-control-plaintext">@Model.RegistrationNumber</div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label fw-bold">Vehicle Type</label>
+                <div class="form-control-plaintext">@Model.VehicleTypeName</div>
+            </div>
+
+            @if (Model.ArrivalTime is not null)
+            {
+                <div class="form-group">
+                    <label class="control-label fw-bold">Parking start time</label>
+                    <div class="form-control-plaintext">
+                        @Model.ArrivalTime?.ToString("yyyy-MM-dd HH:mm")
+                    </div>
+                </div>
+            }
+
+            <div class="form-group">
+                <label asp-for="Make" class="control-label fw-bold"></label>
+                <input asp-for="Make" class="form-control" />
+                <span asp-validation-for="Make" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Model" class="control-label fw-bold"></label>
+                <input asp-for="Model" class="form-control" />
+                <span asp-validation-for="Model" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="NumberOfWheels" class="control-label fw-bold"></label>
+                <input asp-for="NumberOfWheels" class="form-control" />
+                <span asp-validation-for="NumberOfWheels" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Color" class="control-label fw-bold"></label>
+                <input asp-for="Color" class="form-control" />
+                <span asp-validation-for="Color" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-2">
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+
+
+
+@* @model EditVehicleViewModel
+
+@{
+    ViewData["Title"] = "EditVehicle";
+}
+
+<h4>Edit Vehicle</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label class="control-label fw-bold">Registration Number</label>
+                <div class="form-control-plaintext">
+                    @Model.RegistrationNumber
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label fw-bold">Vehicle Type</label>
+                <div class="form-control-plaintext">
+                    @Model.VehicleTypeName
+                </div>
+            </div> 
+
+            @if (Model.ArrivalTime is not null)
+            {
+                <div class="form-group">
+                    <label class="control-label fw-bold">Parking start time</label>
+                    <div class="form-control-plaintext">
+                        @Model.ArrivalTime?.ToString("yyyy-MM-dd HH:mm")
+                    </div>
+				</div>
+			}
+            <div class="form-group">
+                <label asp-for="Make" class="control-label fw-bold"></label>
+                <input asp-for="Make" class="form-control" />
+                <span asp-validation-for="Make" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Model" class="control-label fw-bold"></label>
+                <input asp-for="Model" class="form-control" />
+                <span asp-validation-for="Model" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumberOfWheels" class="control-label fw-bold"></label>
+                <input asp-for="NumberOfWheels" class="form-control" />
+                <span asp-validation-for="NumberOfWheels" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Color" class="control-label fw-bold"></label>
+                <input asp-for="Color" class="form-control" />
+                <span asp-validation-for="Color" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+ *@
