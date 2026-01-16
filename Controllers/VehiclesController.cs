@@ -43,14 +43,31 @@ namespace Garage_2.Controllers
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            // Basquery: bara användarens fordon
-            IQueryable<Vehicle> query = _context.Vehicles
-                .AsNoTracking()
-                .Where(v => v.ApplicationUserId == userId)
-                .Include(v => v.VehicleType)
-                .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null)); // aktiv session (max 1)
+            IQueryable<Vehicle> query = Enumerable.Empty<Vehicle>().AsQueryable();
 
-            query = _searchService.Search(query, searchString, searchField);
+            if (User.IsInRole("User"))
+            {
+                // Basquery: bara användarens fordon
+                query = _context.Vehicles
+                    .AsNoTracking()
+                    .Where(v => v.ApplicationUserId == userId)
+                    .Include(v => v.VehicleType)
+                    .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null)); // aktiv session (max 1)
+
+                query = _searchService.Search(query, searchString, searchField);
+            }
+
+            if (User.IsInRole("Admin"))
+            {
+                // Basquery: för admin som ser alla fordon
+                query = _context.Vehicles
+                    .AsNoTracking()
+                    .Include(v => v.VehicleType)
+                    .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null)); // aktiv session (max 1)
+
+                query = _searchService.Search(query, searchString, searchField);
+            }
+
 
             var now = DateTime.Now;
 
