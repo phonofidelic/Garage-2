@@ -36,8 +36,6 @@ namespace Garage_2.Controllers
             ParkingSessionsIndexViewModel viewModel = new();
 
             var parkingSessions = _context.ParkingSessions
-                .Include(p => p.Vehicle)
-                    .ThenInclude(v => v.VehicleType)
                 .Include(ps => ps.VehicleParkings)
                     .ThenInclude(vp => vp.ParkingSpotV2);
 
@@ -45,6 +43,8 @@ namespace Garage_2.Controllers
             {
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
                 var userParkingSessions = parkingSessions
+                    .Include(p => p.Vehicle)
+                        .ThenInclude(v => v.VehicleType)
                     .Where(ps => ps.Vehicle.ApplicationUserId == userId);
 
                 viewModel.ParkingSessionsList = await userParkingSessions
@@ -66,10 +66,15 @@ namespace Garage_2.Controllers
             if (User.IsInRole("Admin"))
             {
                 viewModel.ParkingSessionsList = await parkingSessions
+                    .Include(p => p.Vehicle)
+                        .ThenInclude(v => v.VehicleType)
+                    .Include(p => p.Vehicle)
+                        .ThenInclude(v => v.User)
                     .Select(parkingSession => new ParkingSessionsListItemViewModel()
                 {
                     Id = parkingSession.Id,
                     VehicleId = parkingSession.VehicleId,
+                    VehicleOwner = parkingSession.Vehicle.User.UserName ?? "",
                     VehicleType = parkingSession.Vehicle.VehicleType.Name,
                     RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
                     ArrivalTime = parkingSession.ArrivalTime,
