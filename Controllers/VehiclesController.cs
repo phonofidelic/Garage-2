@@ -53,7 +53,6 @@ namespace Garage_2.Controllers
                 .ThenInclude(vp => vp.ParkingSpotV2);
 
                 query = _searchService.Search(query, searchString, searchField);
-            }
 
             if (User.IsInRole("Admin"))
             {
