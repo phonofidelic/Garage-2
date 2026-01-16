@@ -1,5 +1,4 @@
-﻿using Garage_2.Models.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Garage_2.Models.ViewModels
 {
@@ -17,9 +16,5 @@ namespace Garage_2.Models.ViewModels
 
         [Display(Name = "Parked time")]
         public TimeSpan? ParkedTime { get; set; }
-
-        public ParkingSession? ActiveSession { get; init; }
-
-        public bool IsParked { get => ActiveSession != null; }
     }
 }
