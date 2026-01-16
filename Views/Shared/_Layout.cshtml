@@ -32,9 +32,9 @@
                         </li>
 
                         <li class="nav-item">
-							<a class="nav-link text-dark"
-                               asp-controller="GarageStatistics"
-							   asp-action="GarageStatsOverview">Garage Statistics</a>
+                            <a class="nav-link text-dark"
+                               asp-controller="ParkingSessions"
+                               asp-action="Index">Parking History</a>
                         </li>
 
                         @if (User.IsInRole("Admin"))
@@ -47,9 +47,9 @@
                         }
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-controller="ParkingSessions"
-                               asp-action="Index">Parking History</a>
+							<a class="nav-link text-dark"
+                               asp-controller="GarageStatistics"
+							   asp-action="GarageStatsOverview">Garage Statistics</a>
                         </li>
 
                         <li class="nav-item ms-0 ms-sm-auto">

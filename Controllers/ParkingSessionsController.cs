@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage_2.Data;
 using Garage_2.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Garage_2.Models.ViewModels.ParkingSessions;
 
 namespace Garage_2.Controllers
 {
+    [Authorize]
     public class ParkingSessionsController : Controller
     {
         private readonly GarageContext _context;
@@ -23,7 +26,26 @@ namespace Garage_2.Controllers
         public async Task<IActionResult> Index()
         {
             var garageContext = _context.ParkingSessions.Include(p => p.Vehicle);
-            return View(await garageContext.ToListAsync());
+
+            ParkingSessionsIndexViewModel viewModel = new();
+
+            if (User.IsInRole("Admin"))
+            {
+                viewModel.ParkingSessionsList = await _context.ParkingSessions
+                .Include(p => p.Vehicle)
+                .Select(s => new ParkingSessionsListItemViewModel
+                {
+                    Id = s.Id,
+                    VehicleId = s.VehicleId,
+                    VehicleType = s.Vehicle.VehicleType.Name,
+                    RegistrationNumber = s.Vehicle.RegistrationNumber,
+                    ArrivalTime = s.ArrivalTime,
+                    DepartureTime = s.DepartureTime
+                })
+                .ToListAsync();
+            }
+
+            return View(viewModel);
         }
 
         // GET: ParkingSessions/Details/5

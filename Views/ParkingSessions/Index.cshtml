@@ -1,5 +1,4 @@
-﻿@model IEnumerable<Garage_2.Models.Entities.ParkingSession>
-
+﻿@model ParkingSessionsIndexViewModel
 @{
     ViewData["Title"] = "Index";
 }
@@ -13,29 +12,48 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Vehicle)
+                @Html.DisplayNameFor(model => model.ListParameters.VehicleType)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ArrivalTime)
+                @Html.DisplayNameFor(model => model.ListParameters.RegistrationNumber)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DepartureTime)
+                @Html.DisplayNameFor(model => model.ListParameters.ArrivalTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ListParameters.ParkedTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ListParameters.DepartureTime)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.ListParameters.TotalCost)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @foreach (var item in Model.ParkingSessionsList)
+        {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Vehicle.Color)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ArrivalTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DepartureTime)
-            </td>
+                <th>
+                    @Html.DisplayFor(model => item.VehicleType)
+                </th>
+                <th>
+                    @Html.DisplayFor(model => item.RegistrationNumber)
+                </th>
+                <th>
+                    @Html.DisplayFor(model => item.ArrivalTime)
+                </th>
+                <th>
+                    @Html.DisplayFor(model => item.ParkedTime)
+                </th>
+                <th>
+                    @Html.DisplayFor(model => item.DepartureTime)
+                </th>
+                <th>
+                    @Html.DisplayFor(model => item.TotalCost)
+                </th>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
