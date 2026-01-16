@@ -193,14 +193,14 @@ public class UserRolesController : Controller
 
         var currentRoles = await _userManager.GetRolesAsync(user);
 
-        //bool isProtectedAdmin = currentRoles.Contains(AdminRoleName);
+        bool isProtectedAdmin = currentRoles.Contains(AdminRoleName);
 
-        //if (isProtectedAdmin && !string.Equals(roleName, AdminRoleName, StringComparison.Ordinal))
-        //{
-        //    TempData["AlertType"] = "warning";
-        //    TempData["AlertMessage"] = "Admin users cannot be demoted.";
-        //    return RedirectToAction(nameof(Index));
-        //}
+        if (isProtectedAdmin && !string.Equals(roleName, AdminRoleName, StringComparison.Ordinal))
+        {
+            TempData["AlertType"] = "warning";
+            TempData["AlertMessage"] = "Admin users cannot be demoted.";
+            return RedirectToAction(nameof(Index));
+        }
 
         if (currentRoles.Count > 0)
         {
