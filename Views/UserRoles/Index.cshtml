@@ -1,0 +1,156 @@
+﻿@model Garage_2.Models.ViewModels.AdminAccessViewModel
+
+@{
+    ViewData["Title"] = "Admin: Users & Roles";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["AlertMessage"] is string message)
+{
+    var alertType = TempData["AlertType"] as string ?? "info";
+    <div class="alert alert-@alertType" role="alert">@message</div>
+}
+
+<div class="row">
+    <div class="col-lg-6">
+        <h4>Create role</h4>
+
+        <form asp-action="Create" method="post" class="d-flex gap-2 mb-3">
+            @Html.AntiForgeryToken()
+            <input name="name" class="form-control" placeholder="Role name (e.g. SuperUser)" />
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+
+        <h4>Roles</h4>
+
+        @if (Model.Roles.Count == 0)
+        {
+            <p>No roles found.</p>
+        }
+        else
+        {
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th style="width: 1%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var role in Model.Roles)
+                    {
+                        <tr>
+                            <td>
+                                @role.Name
+                                @if (role.IsProtected)
+                                {
+                                    <span class="badge text-bg-secondary ms-2">Protected</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="Delete" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@role.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            disabled="@role.IsProtected"
+                                            onclick="return confirm('Delete role @role.Name?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="col-lg-6">
+        <h4>Users</h4>
+
+        @if (Model.Users.Count == 0)
+        {
+            <p>No users found.</p>
+        }
+        else if (Model.AvailableRoles.Count == 0)
+        {
+            <div class="alert alert-warning" role="alert">
+                No roles exist. Create roles first.
+            </div>
+        }
+        else
+        {
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th style="width: 1%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@user.Email</div>
+                                <div class="text-muted small">@user.UserName</div>
+                                @if (user.IsProtected)
+                                {
+                                    <span class="badge text-bg-secondary">Protected Admin</span>
+                                }
+                            </td>
+
+                            <td>
+                                <form asp-action="UpdateUserRole" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach (var role in Model.AvailableRoles)
+                                        {
+                                            var id = $"role_{user.UserId}_{role.Value}";
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       type="radio"
+                                                       name="roleName"
+                                                       id="@id"
+                                                       value="@role.Value"
+                                                       checked="@(string.Equals(user.SelectedRole, role.Value, StringComparison.Ordinal))"
+                                                       @* disabled="@(user.IsProtectedAdmin && !string.Equals(role.Value, "Admin", StringComparison.Ordinal) *@)" />
+                                                <label class="form-check-label" for="@id">@role.Text</label>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-primary"
+                                                @* disabled="@user.IsProtectedAdmin" *@>
+                                            Save
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+
+                            <td class="text-end">
+                                <form asp-action="DeleteUser" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            disabled="@user.IsProtected"
+                                            onclick="return confirm('Delete user @user.Email?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
