@@ -10,6 +10,7 @@ using Garage_2.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Garage_2.Models.ViewModels.ParkingSessions;
 using Garage_2.Interfaces;
+using System.Security.Claims;
 
 namespace Garage_2.Controllers
 {
@@ -34,14 +35,38 @@ namespace Garage_2.Controllers
 
             ParkingSessionsIndexViewModel viewModel = new();
 
-            if (User.IsInRole("Admin"))
-            {
-                viewModel.ParkingSessionsList = await _context.ParkingSessions
+            var parkingSessions = _context.ParkingSessions
                 .Include(p => p.Vehicle)
                     .ThenInclude(v => v.VehicleType)
                 .Include(ps => ps.VehicleParkings)
-                    .ThenInclude(vp => vp.ParkingSpotV2)
-                .Select(parkingSession => new ParkingSessionsListItemViewModel()
+                    .ThenInclude(vp => vp.ParkingSpotV2);
+
+            if (User.IsInRole("User"))
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var userParkingSessions = parkingSessions
+                    .Where(ps => ps.Vehicle.ApplicationUserId == userId);
+
+                viewModel.ParkingSessionsList = await userParkingSessions
+                    .Select(parkingSession => new ParkingSessionsListItemViewModel()
+                    {
+                        Id = parkingSession.Id,
+                        VehicleId = parkingSession.VehicleId,
+                        VehicleType = parkingSession.Vehicle.VehicleType.Name,
+                        RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
+                        ArrivalTime = parkingSession.ArrivalTime,
+                        DepartureTime = parkingSession.DepartureTime,
+                        TotalCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now)
+                    })
+                    .ToListAsync();
+
+                return View(viewModel);
+            }
+
+            if (User.IsInRole("Admin"))
+            {
+                viewModel.ParkingSessionsList = await parkingSessions
+                    .Select(parkingSession => new ParkingSessionsListItemViewModel()
                 {
                     Id = parkingSession.Id,
                     VehicleId = parkingSession.VehicleId,
@@ -53,8 +78,9 @@ namespace Garage_2.Controllers
                 })
                 .ToListAsync();
             }
-
+           
             return View(viewModel);
+
         }
 
         // GET: ParkingSessions/Details/5
