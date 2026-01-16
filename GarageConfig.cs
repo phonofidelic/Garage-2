@@ -1,6 +1,7 @@
 ﻿using Humanizer;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Garage_2
@@ -19,5 +20,8 @@ namespace Garage_2
         [Range(1, int.MaxValue, ErrorMessage = "The field {0} must be positive.")]
         [Required]
         public int GarageSize { get; set; }
+
+        [Required]
+        public string SystemCulture { get; set; } = string.Empty;
     }
 }
