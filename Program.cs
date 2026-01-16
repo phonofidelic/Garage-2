@@ -23,6 +23,7 @@ builder.Services.AddOptions<GarageConfig>()
 
 builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
 builder.Services.AddScoped<IParkingService, ParkingService>();
+builder.Services.AddScoped<IParkingSessionService, ParkingSessionService>();
 
 var app = builder.Build();
 
