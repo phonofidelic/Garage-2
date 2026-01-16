@@ -14,6 +14,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.ListParameters.VehicleType)
             </th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model.ListParameters.VehicleOwner)
+                </th>
+            }
             <th>
                 @Html.DisplayNameFor(model => model.ListParameters.RegistrationNumber)
             </th>
@@ -27,7 +33,7 @@
                 @Html.DisplayNameFor(model => model.ListParameters.DepartureTime)
             </th>
             <th>
-            @Html.DisplayNameFor(model => model.ListParameters.TotalCost)
+                @Html.DisplayNameFor(model => model.ListParameters.TotalCost)
             </th>
             <th></th>
         </tr>
@@ -35,10 +41,16 @@
     <tbody>
         @foreach (var item in Model.ParkingSessionsList)
         {
-        <tr>
+            <tr>
                 <th>
                     @Html.DisplayFor(model => item.VehicleType)
                 </th>
+                @if (User.IsInRole("Admin"))
+                {
+                    <th>
+                        @Html.DisplayFor(model => item.VehicleOwner)
+                    </th>
+                }
                 <th>
                     @Html.DisplayFor(model => item.RegistrationNumber)
                 </th>
@@ -54,12 +66,12 @@
                 <th>
                     @Html.DisplayFor(model => item.TotalCost)
                 </th>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
