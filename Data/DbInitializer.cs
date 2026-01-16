@@ -1,294 +1,213 @@
-﻿using Garage_2.Models;
+﻿using Garage_2.Models.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Data
 {
     public static class DbInitializer
     {
-        public static void Seed(IApplicationBuilder appBuilder)
+        public static async Task SeedAsync(IApplicationBuilder app)
         {
-            // ApplicationBuilder-objektet är ett objekt som representerar appen och ger access till DbContext(via Services),
-            // då DI ej kan användas här (en statisk Helper-klass som saknar konstruktor kan ej skapas med DI av Service-containern.)
-            // och DbContext SKA skapas via Services och inget annat så kan den inte skickas in här.
+            using var scope = app.ApplicationServices.CreateScope();
 
-            GarageContext context = appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<GarageContext>();
+            var context = scope.ServiceProvider.GetRequiredService<GarageContext>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-            // Fyll bara på med seed-data om db är tom (dvs ingen överskrivning av befintligt data)
+            // 1) Se till att DB + migrations är på plats (valfritt men praktiskt i dev)
+            await context.Database.MigrateAsync();
 
-            if (!context.ParkedVehicle.Any())
-                context.ParkedVehicle.AddRange(parkedVehiclesList);
+            // 2) Seed roller + admin 
+            await SeedRolesAndAdminAsync(roleManager, userManager);
 
-            if (!context.ParkingSpots.Any())
-                context.ParkingSpots.AddRange(ParkingSpotsList());
+            // 3) Seed VehicleTypes
+            await SeedVehicleTypesAsync(context);
 
-            context.SaveChanges();
+            // 4) Seed ParkingSpots (tomma)
+            await SeedParkingSpotsAsync(context);
 
-            // Endast om data finns i både ParkedVehicle och ParkingSpots kan join-tabellen fyllas med relationer
-            if (context.ParkingSpots.Any() && context.ParkedVehicle.Any())
+            // 5) Seed:a Fordon för adminanvändaren 
+            await SeedDemoVehiclesForAdminAsync(context, userManager);
+
+        }
+
+        private static async Task SeedRolesAndAdminAsync(
+            RoleManager<IdentityRole> roleManager,
+            UserManager<ApplicationUser> userManager)
+        {
+            string[] roles = ["Admin", "User"];
+
+            foreach (var role in roles)
             {
-                SeedVehicleSpots(context);
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+            const string adminEmail = "admin@garage.se";
+            const string adminPassword = "Admin123!"; // byt i riktig miljö
+
+            var admin = await userManager.FindByEmailAsync(adminEmail);
+            if (admin is null)
+            {
+                admin = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FirstName = "Admin",
+                    LastName = "Adminsson",
+                    SSN = "19810101-1234",
+                    EmailConfirmed = true,
+                };
+
+                var createResult = await userManager.CreateAsync(admin, adminPassword);
+                if (!createResult.Succeeded)
+                {
+                    // Krass: faila tidigt så du ser vad som är fel (password policy osv)
+                    var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to create admin user: {errors}");
+                }
+            }
+
+            if (!await userManager.IsInRoleAsync(admin, "Admin"))
+            {
+                await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
 
-
-        // Seed-data – Lista (property) av vehicles av alla typer i applikationen (Car, Motorcycle, Bus, Boat)
-        // Olika parkeringsdatum (ArrivalTime) för att kunna få ut lite olika priser vid uthämtning av fordonet
-        public static List<ParkedVehicle> parkedVehiclesList
+        private static async Task SeedVehicleTypesAsync(GarageContext context)
         {
-            get
+            if (await context.VehicleTypes.AnyAsync())
+                return;
+
+            var types = new List<VehicleType>
             {
-                DateTime now = DateTime.Now;
-                var vehicles = new List<ParkedVehicle>();
+                new() { Name = "Motorcycle", SizeInUnits = 1 },
+                new() { Name = "Car",        SizeInUnits = 3 },
+                new() { Name = "Bus",        SizeInUnits = 6 },
+                new() { Name = "Boat",       SizeInUnits = 9 }
+            };
 
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Red",
-                    Make = "Volvo",
-                    Model = "XC60",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "ABC123",
-                    ArrivalTime = now.AddMinutes(-30)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Black",
-                    Make = "BMW",
-                    Model = "320i",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "DEF456",
-                    ArrivalTime = now.AddHours(-1)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "White",
-                    Make = "Tesla",
-                    Model = "Model 3",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "GHI789",
-                    ArrivalTime = now.AddHours(-5)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Motorcycle,
-                    Color = "Black",
-                    Make = "Yamaha",
-                    Model = "MT-07",
-                    NumberOfWheels = 2,
-                    RegistrationNumber = "JKL321",
-                    ArrivalTime = now.AddHours(-12)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Motorcycle,
-                    Color = "Blue",
-                    Make = "Honda",
-                    Model = "CBR600RR",
-                    NumberOfWheels = 2,
-                    RegistrationNumber = "MNO654",
-                    ArrivalTime = now.AddHours(-24)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Silver",
-                    Make = "Audi",
-                    Model = "A6",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "PQR987",
-                    ArrivalTime = now.AddDays(-2)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Green",
-                    Make = "Volkswagen",
-                    Model = "Golf",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "STU159",
-                    ArrivalTime = now.AddDays(-14)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Bus,
-                    Color = "Yellow",
-                    Make = "Scania",
-                    Model = "Citywide",
-                    NumberOfWheels = 6,
-                    RegistrationNumber = "VWX753",
-                    ArrivalTime = now.AddMonths(-1)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Bus,
-                    Color = "Blue",
-                    Make = "Volvo",
-                    Model = "7900 Electric",
-                    NumberOfWheels = 6,
-                    RegistrationNumber = "YZA852",
-                    ArrivalTime = now
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Boat,
-                    Color = "White",
-                    Make = "Nimbus",
-                    Model = "27 Nova",
-                    NumberOfWheels = 0,
-                    RegistrationNumber = "BCD246",
-                    ArrivalTime = now.AddYears(-1)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Boat,
-                    Color = "Blue",
-                    Make = "Yamarin",
-                    Model = "63 DC",
-                    NumberOfWheels = 0,
-                    RegistrationNumber = "EFG369",
-                    ArrivalTime = now.AddMinutes(-25)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Gray",
-                    Make = "Toyota",
-                    Model = "Corolla",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "HIJ741",
-                    ArrivalTime = now.AddMinutes(-45)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Blue",
-                    Make = "Ford",
-                    Model = "Focus",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "KLM963",
-                    ArrivalTime = now.AddHours(-3.5)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Motorcycle,
-                    Color = "Red",
-                    Make = "Ducati",
-                    Model = "Monster",
-                    NumberOfWheels = 2,
-                    RegistrationNumber = "NOP147",
-                    ArrivalTime = now.AddHours(-4.5)
-                });
-
-                vehicles.Add(new ParkedVehicle
-                {
-                    Type = VehicleType.Car,
-                    Color = "Black",
-                    Make = "Mercedes-Benz",
-                    Model = "C220",
-                    NumberOfWheels = 4,
-                    RegistrationNumber = "QRS258",
-                    ArrivalTime = now.AddHours(-36)
-                });
-
-                return vehicles;
-            }
+            context.VehicleTypes.AddRange(types);
+            await context.SaveChangesAsync();
         }
 
-
-        // Seed-data – Lista av p-platser (ParkingSpot) 1-50 (hårdkodat) med initial kapacitet 3, dvs tomma parkeringsplatser
-        private static List<ParkingSpot> ParkingSpotsList()
+        private static async Task SeedParkingSpotsAsync(GarageContext context)
         {
-            var spots = new List<ParkingSpot>();
+            if (await context.ParkingSpotV2.AnyAsync())
+                return;
 
-            // Obs! Hårdkodat antal p-platser i garaget här.
-            // TODO: Borde fixas, hämtas från config istället (?)
             const int totalSpots = 50;
 
-            for (int i = 1; i <= totalSpots; i++)
-            {
-                spots.Add(new ParkingSpot { SpotNumber = i, CapacityUnits = 3 });
-            }
-
-            return spots;
-
-        }
-
-        private static void SeedVehicleSpots(GarageContext context)
-        {
-            if (!context.VehicleSpots.Any())
-            {
-                var spots = context.ParkingSpots
-                    .OrderBy(s => s.SpotNumber)
-                    .ToList();
-
-                var vehicles = context.ParkedVehicle
-                    .OrderBy(v => v.Id)
-                    .ToList();
-
-                int spotIndex = 0;
-                int unitsRequired;
-
-                foreach (var vehicle in vehicles)
+            var spots = Enumerable.Range(1, totalSpots)
+                .Select(i => new ParkingSpotV2
                 {
-                    unitsRequired = 0;
+                    SpotNumber = i,
+                    CapacityUnits = 3,
+                    IsBlocked = false
+                })
+                .ToList();
 
-                    switch (vehicle.Type)
-                    {
-                        case VehicleType.Motorcycle:
-                            unitsRequired = 1;
-                            break;
-                        case VehicleType.Car:
-                            unitsRequired = 3;
-                            break;
-                        case VehicleType.Bus:
-                            unitsRequired = 6;
-                            break;
-                        case VehicleType.Boat:
-                            unitsRequired = 9;
-                            break;
-                        default:
-                            throw new NotImplementedException();
-                    }
-
-                    int unitsLeft = unitsRequired;
-
-                    while (unitsLeft > 0)
-                    {
-                        var spot = spots[spotIndex];
-
-                        context.VehicleSpots.Add(new VehicleSpot
-                        {
-                            ParkedVehicleId = vehicle.Id,
-                            ParkingSpotId = spot.Id,
-                            UnitsUsed = Math.Min(3, unitsLeft)
-                        });
-
-                        unitsLeft -= 3;
-                        spotIndex++;
-                    }
-                }
-
-                context.SaveChanges();
-            }
+            context.ParkingSpotV2.AddRange(spots);
+            await context.SaveChangesAsync();
         }
+
+        private static async Task SeedDemoVehiclesForAdminAsync(
+    GarageContext context,
+    UserManager<ApplicationUser> userManager)
+        {
+            const string adminEmail = "admin@garage.se";
+
+            var admin = await userManager.FindByEmailAsync(adminEmail);
+            if (admin is null)
+                return; // admin seed avstängt eller misslyckades -> hoppa över demo vehicles
+
+            // Skapa bara demo vehicles om admin inte redan har några (så vi inte spammar vid varje start)
+            bool adminHasVehicles = await context.Vehicles.AnyAsync(v => v.ApplicationUserId == admin.Id);
+            if (adminHasVehicles)
+                return;
+
+            // Hämta VehicleTypeId för varje typ (Names ska matcha dina seedade VehicleTypes)
+            var typeIds = await context.VehicleTypes
+                .AsNoTracking()
+                .ToDictionaryAsync(t => t.Name, t => t.Id);
+
+            int CarId = typeIds["Car"];
+            int MotorcycleId = typeIds["Motorcycle"];
+            int BusId = typeIds["Bus"];
+            int BoatId = typeIds["Boat"];
+
+            // Registrerade fordon: ingen parkering, inga sessions.
+            var vehicles = new List<Vehicle>
+    {
+        new()
+        {
+            RegistrationNumber = "ABC123",
+            Make = "Volvo",
+            Model = "XC60",
+            NumberOfWheels = 4,
+            Color = "Red",
+            VehicleTypeId = CarId,
+            ApplicationUserId = admin.Id
+        },
+        new()
+        {
+            RegistrationNumber = "DEF456",
+            Make = "BMW",
+            Model = "320i",
+            NumberOfWheels = 4,
+            Color = "Black",
+            VehicleTypeId = CarId,
+            ApplicationUserId = admin.Id
+        },
+        new()
+        {
+            RegistrationNumber = "JKL321",
+            Make = "Yamaha",
+            Model = "MT-07",
+            NumberOfWheels = 2,
+            Color = "Black",
+            VehicleTypeId = MotorcycleId,
+            ApplicationUserId = admin.Id
+        },
+        new()
+        {
+            RegistrationNumber = "VWX753",
+            Make = "Scania",
+            Model = "Citywide",
+            NumberOfWheels = 6,
+            Color = "Yellow",
+            VehicleTypeId = BusId,
+            ApplicationUserId = admin.Id
+        },
+        new()
+        {
+            RegistrationNumber = "BCD246",
+            Make = "Nimbus",
+            Model = "27 Nova",
+            NumberOfWheels = 0,
+            Color = "White",
+            VehicleTypeId = BoatId,
+            ApplicationUserId = admin.Id
+        }
+    };
+
+            // DB har unik index på RegistrationNumber -> skydda mot krock om du ändrar logiken senare
+            var regNumbers = vehicles.Select(v => v.RegistrationNumber).ToList();
+            var existingRegs = await context.Vehicles
+                .AsNoTracking()
+                .Where(v => regNumbers.Contains(v.RegistrationNumber))
+                .Select(v => v.RegistrationNumber)
+                .ToListAsync();
+
+            vehicles.RemoveAll(v => existingRegs.Contains(v.RegistrationNumber));
+
+            if (vehicles.Count == 0)
+                return;
+
+            context.Vehicles.AddRange(vehicles);
+            await context.SaveChangesAsync();
+        }
+
     }
-
-
 }
-
-
-

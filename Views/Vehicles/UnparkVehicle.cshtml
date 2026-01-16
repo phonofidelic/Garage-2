@@ -1,0 +1,75 @@
+﻿@using Garage_2.Models.Entities
+@model ParkingSession
+
+@{
+    ViewData["Title"] = "Check out";
+}
+
+<h1>Check out vehicle</h1>
+
+<div>
+    <h4>Active parking session</h4>
+
+    <p>
+        <strong>At parking spot(s) no:</strong>
+        @string.Join(", ", Model.VehicleParkings.Select(vp => vp.ParkingSpotV2.SpotNumber))
+    </p>
+
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(m => m.Vehicle.RegistrationNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(m => m.Vehicle.RegistrationNumber)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(m => m.Vehicle.Make)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(m => m.Vehicle.Make)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(m => m.Vehicle.Model)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(m => m.Vehicle.Model)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(m => m.Vehicle.NumberOfWheels)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(m => m.Vehicle.NumberOfWheels)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(m => m.Vehicle.Color)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(m => m.Vehicle.Color)
+        </dd>
+
+        <dt class="col-sm-2">Arrival time</dt>
+        <dd class="col-sm-10">
+            @Model.ArrivalTime.ToString("yyyy-MM-dd HH:mm")
+        </dd>
+
+        <dt class="col-sm-2">Vehicle type</dt>
+        <dd class="col-sm-10">
+            @Model.Vehicle.VehicleType.Name
+        </dd>
+    </dl>
+
+    <form asp-action="UnparkConfirmed" method="post">
+        <a class="btn btn-outline-secondary" asp-action="Index">Back to List</a>
+
+        @* Viktigt: din controller tar "id = VehicleId" i UnparkConfirmed *@
+        <input type="hidden" name="id" value="@Model.VehicleId" />
+
+        <button type="submit" class="btn btn-success">Check out vehicle</button>
+    </form>
+</div>

@@ -40,7 +40,7 @@
     style="top: 48px; @@media (min-width: 768px) { top: 57px }">
     <div class="container d-flex p-3 px-4 gap-2">
         <div>
-            <a asp-action="ParkNewVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Park
+            <a asp-action="RegisterVehicle" class="btn btn-primary text-start text-nowrap text-truncate">Register
                 <span class="d-none d-sm-inline">new vehicle</span>
             </a>
         </div>
@@ -132,7 +132,7 @@
                 @Html.DisplayFor(modelItem => item.Type)
             </td>
                 <td class="text-nowrap">
-                @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m")
+               @*  @($"{item.ParkedTime.Days}d {item.ParkedTime.Hours}h {item.ParkedTime.Minutes}m") *@
             </td>
             <td>
                 <div class="d-flex flex-nowrap gap-2">

@@ -16,7 +16,7 @@ namespace Garage_2.Data
         //public DbSet<ParkedVehicle> ParkedVehicle { get; set; } = default!;
         //public DbSet<VehicleSpot> VehicleSpots { get; set; } = default!;
 
-        public DbSet<ParkingSpotV2> ParkingSpots { get; set; } = default!;
+        public DbSet<ParkingSpotV2> ParkingSpotV2 { get; set; } = default!;
         public DbSet<VehicleType> VehicleTypes { get; set; } = default!;
         public DbSet<Vehicle> Vehicles { get; set; } = default!;
         public DbSet<ParkingSession> ParkingSessions { get; set; } = default!;

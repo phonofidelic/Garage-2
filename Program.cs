@@ -1,14 +1,10 @@
 using Garage_2;
 using Garage_2.Data;
 using Garage_2.Interfaces;
-using Garage_2.Services;
-using Microsoft.AspNetCore.Builder.Extensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.Identity.Client;
-using System.Configuration;
-using Microsoft.AspNetCore.Identity;
 using Garage_2.Models.Entities;
+using Garage_2.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<GarageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GarageContext") ?? throw new InvalidOperationException("Connection string 'GarageContext' not found.")));
@@ -47,12 +43,12 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=ParkedVehicles}/{action=Index}/{id?}")
+    pattern: "{controller=Vehicles}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.MapRazorPages()
     .WithStaticAssets();
 
-DbInitializer.Seed(app);
+await DbInitializer.SeedAsync(app);
 
 app.Run();

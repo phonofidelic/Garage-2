@@ -1,13 +1,24 @@
-﻿namespace Garage_2.Models.ViewModels
+﻿using Garage_2.Models.Entities;
+
+
+namespace Garage_2.Models.ViewModels
 {
     public class DetailsViewModel
     {
-        public ParkedVehicle Vehicle { get; }
-        public IReadOnlyList<VehicleSpot> VehicleSpots { get; }
-        public DetailsViewModel(ParkedVehicle vehicle, List<VehicleSpot> vehicleSpots)
+        public Vehicle Vehicle { get; }
+        public ParkingSession? ActiveSession { get; }
+
+        public DetailsViewModel(Vehicle vehicle, ParkingSession? activeSession)
         {
             Vehicle = vehicle;
-            VehicleSpots = vehicleSpots;
+            ActiveSession = activeSession;
         }
+
+        // Hjälp-properties så vyn blir enkel
+        public bool IsParked => ActiveSession is not null;
+
+        public IReadOnlyList<VehicleParking> CurrentParkings =>
+            ActiveSession?.VehicleParkings?.ToList() ?? new List<VehicleParking>();
     }
+
 }

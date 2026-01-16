@@ -1,0 +1,80 @@
+﻿@model Garage_2.Models.ViewModels.DetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Vehicle</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.RegistrationNumber)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.RegistrationNumber</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Make)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Make</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Model)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Model</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.NumberOfWheels)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.NumberOfWheels</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Vehicle.Color)</dt>
+        <dd class="col-sm-10">@Model.Vehicle.Color</dd>
+
+        <dt class="col-sm-2">Vehicle type</dt>
+        <dd class="col-sm-10">@Model.Vehicle.VehicleType?.Name</dd>
+
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">
+            @if (Model.ActiveSession is null)
+            {
+                <span class="badge bg-secondary">Not parked</span>
+            }
+            else
+            {
+                <span class="badge bg-success">Parked</span>
+            }
+        </dd>
+
+        @if (Model.ActiveSession is not null)
+        {
+            <dt class="col-sm-2">Arrival time</dt>
+            <dd class="col-sm-10">@Model.ActiveSession.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</dd>
+
+            <dt class="col-sm-2">Parking spot(s)</dt>
+            <dd class="col-sm-10">
+                @foreach (var vp in Model.ActiveSession.VehicleParkings)
+                {
+                    <div>
+                        @vp.ParkingSpotV2.SpotNumber
+                        @if (vp.UnitsUsed < 3)
+                        {
+                            <span>(@vp.UnitsUsed/3)</span>
+                        }
+                    </div>
+                }
+            </dd>
+        }
+    </dl>
+</div>
+
+<div>
+    <a class="btn btn-outline-secondary" asp-action="Index" asp-route-searchString="@ViewData["CurrentFilter"]">Back to List</a>
+    <a class="btn btn-primary" asp-action="EditVehicle" asp-route-id="@Model.Vehicle.Id">Edit</a>
+
+    @if (Model.ActiveSession is null)
+    {
+        <form asp-action="ParkVehicle" method="post" class="d-inline">
+            <input type="hidden" name="id" value="@Model.Vehicle.Id" />
+            <button type="submit" class="btn btn-success">Park</button>
+        </form>
+    }
+    else
+    {
+        <a class="btn btn-primary" asp-action="UnparkVehicle" asp-route-id="@Model.Vehicle.Id">Check out</a>
+    }
+</div>

@@ -2,7 +2,7 @@
 
 namespace Garage_2.Models.ViewModels
 {
-    public class ParkNewVehicleViewModel
+    public class RegisterVehicleViewModel
     {
         private string _registrationNumber = default!;
 
@@ -30,13 +30,15 @@ namespace Garage_2.Models.ViewModels
         public int NumberOfWheels { get; set; }
 
         [Required, StringLength(25)]
-        [RegularExpression(@"^[\w\s]+$", ErrorMessage = "Make may only contain alphanumeric characters and spaces.")]
+        [RegularExpression(@"^[\w\s]+$", ErrorMessage = "Color may only contain alphanumeric characters and spaces.")]
         public string Color { get; set; } = default!;
 
-        [Display(Name = "Arrival time")]
-        public DateTime ArrivalTime { get; set; }
-
         [Required]
-        public VehicleType Type { get; set; }
+        [Display(Name = "Vehicle type")]
+        public int VehicleTypeId { get; set; }   // <-- NY, ersätter Type/enum
+
+        // (Valfritt) för dropdown i vyn
+        public IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? VehicleTypes { get; set; }
     }
+
 }

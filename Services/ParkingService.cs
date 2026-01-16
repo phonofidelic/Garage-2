@@ -2,6 +2,7 @@ using Garage_2.Data;
 using Garage_2.Interfaces;
 using Garage_2.Models;
 using Garage_2.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Services;
 
@@ -16,177 +17,200 @@ public class ParkingService : IParkingService
 
     public async Task<ParkingResult> ParkVehicleAsync(Vehicle vehicle)
     {
-        // Add the vehicle first to get an Id
-        _context.Vehicles.Add(vehicle);
-        await _context.SaveChangesAsync();
+        // Lägger in Vehicle i ParkingSession dvs startar aktiv parkering.
 
-        bool parkingSpotAssigned = false;
 
-        // Get all spots with usage information
-        IQueryable<ParkingSpotWithUnits> spotsWithUsage = _context.ParkingSpots.Select(spot => new ParkingSpotWithUnits
+        if (vehicle.Id == 0)
         {
-            Spot = spot,
-            UsedUnits = spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0,
-            FreeUnits = spot.CapacityUnits - (spot.VehicleParkings.Sum(vs => (int?)vs.UnitsUsed) ?? 0)
-        });
-
-        int unitsNeeded = GetUnitsForVehicle(vehicle.VehicleType.SizeInUnits);
-
-        // Attempt to assign parking spot(s) based on vehicle type
-        switch (vehicle.Type)
-        {
-            case VehicleType.Motorcycle:
-                parkingSpotAssigned = await AssignMotorcycleSpotAsync(vehicle, spotsWithUsage, unitsNeeded);
-                break;
-
-            case VehicleType.Car:
-                parkingSpotAssigned = await AssignCarSpotAsync(vehicle, spotsWithUsage, unitsNeeded);
-                break;
-
-            case VehicleType.Bus:
-                parkingSpotAssigned = await AssignBusSpotAsync(vehicle, spotsWithUsage);
-                break;
-
-            case VehicleType.Boat:
-                parkingSpotAssigned = await AssignBoatSpotAsync(vehicle, spotsWithUsage);
-                break;
+            return new ParkingResult { Success = false, ErrorMessage = "Fordonet är ej registrerat!" };
         }
 
-        if (!parkingSpotAssigned)
-        {
-            // Remove the vehicle if no parking spot could be assigned
-            _context.ParkedVehicle.Remove(vehicle);
-            await _context.SaveChangesAsync();
+        // Kolla att VehicleType finns på fordonet
+        vehicle = await _context.Vehicles.Include(v => v.VehicleType).FirstOrDefaultAsync(v => v.Id == vehicle.Id);
 
-            return new ParkingResult
-            {
-                Success = false,
-                ErrorMessage = "No parking slots available for this vehicle."
-            };
+        if (vehicle is null)
+        {
+            return new ParkingResult { Success = false, ErrorMessage = "Fordonet kunde ej hittas!" };
         }
 
-        // Save assigned parking spot(s)
-        await _context.SaveChangesAsync();
-
-        return new ParkingResult
+        if (vehicle.VehicleType is null)
         {
-            Success = true
+            return new ParkingResult { Success = false, ErrorMessage = "Fordonstyp saknas!" };
+        }
+
+        // Om det finns en aktiv session för detta fordon är det redan parkerat
+        bool hasActiveSession = await _context.ParkingSessions.AnyAsync(ps => ps.VehicleId == vehicle.Id && ps.DepartureTime == null);
+
+        if (hasActiveSession)
+        {
+            return new ParkingResult { Success = false, ErrorMessage = "Fordonet är redan parkerat!" };
+        }
+
+        // Fordon ok att parkera - Skapa ny ParkingSession
+        var parkingSession = new ParkingSession
+        {
+            VehicleId = vehicle.Id,
+            ArrivalTime = DateTime.Now,
+            DepartureTime = null
         };
+
+        // Transaktion: ny rad i parkingSession + koll av parkeringsplats måste hänga ihop i en sammanhängande operation
+        // Annars kan man få en aktiv parkering utan plats, halv plats osv, eller två parkeringar som lyckas samtidigt av två användare
+
+        await using var tx = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            _context.ParkingSessions.Add(parkingSession);
+            await _context.SaveChangesAsync(); // behövs för att få session.Id
+
+            // Beläggning per spot ska baseras på aktiva ParkingSessions
+            // Bygg en query som räknar nuvarande beläggning per parkeringsplats (bara aktiva)
+            IQueryable<ParkingSpotWithUnitsV2> spotsWithUsage = _context.ParkingSpotV2
+                .Select(
+                spot => new ParkingSpotWithUnitsV2
+                {
+                    Spot = spot,
+                    UsedUnits = spot.VehicleParkings.Where(vp => vp.ParkingSession.DepartureTime == null).Sum(vp => (int?)vp.UnitsUsed) ?? 0
+                })
+                .Select(x => new ParkingSpotWithUnitsV2 // .Select() på .Select() återanvänder resultatet från första queryn (dvs x)
+                {
+                    Spot = x.Spot,
+                    UsedUnits = x.UsedUnits,
+                    FreeUnits = x.Spot.CapacityUnits - x.UsedUnits
+                });
+
+            int unitsNeeded = vehicle.VehicleType.SizeInUnits;
+
+            // _context.VehicleParkings.Add körs i Assign-metoderna nedan
+            bool parkingSpotAssigned = vehicle.VehicleType.Name switch
+            {
+                "Motorcycle" => await AssignMotorcycleSpotAsync(parkingSession, spotsWithUsage, unitsNeeded),
+                "Car" => await AssignCarSpotAsync(parkingSession, spotsWithUsage, unitsNeeded),
+                "Bus" => await AssignBusSpotAsync(parkingSession, spotsWithUsage),
+                "Boat" => await AssignBoatSpotAsync(parkingSession, spotsWithUsage),
+                _ => throw new NotImplementedException($"Fordonstyp '{vehicle.VehicleType.Name}' saknar stöd i systemet!")
+            };
+
+            if (!parkingSpotAssigned)
+            {
+                // rulla tillbaka hela sessionen
+                await tx.RollbackAsync();
+
+                return new ParkingResult
+                {
+                    Success = false,
+                    ErrorMessage = "Inga parkeringsplatser tillgängliga för detta fordon!"
+                };
+            }
+
+            await _context.SaveChangesAsync();  // Både tillagda rader i ParkingSessions och VehicleParkings sparas här
+            await tx.CommitAsync();
+
+            return new ParkingResult { Success = true };
+        }
+        catch (DbUpdateException)
+        {
+            // här hamnar du t.ex. om filtered unique index triggas (race condition)
+            await tx.RollbackAsync();
+            return new ParkingResult { Success = false, ErrorMessage = "Parkeringen misslyckades pga en konflikt. Försök igen." };
+        }
+        catch
+        {
+            await tx.RollbackAsync();
+            throw;
+        }
     }
 
-    private async Task<bool> AssignMotorcycleSpotAsync(ParkedVehicle vehicle, IQueryable<ParkingSpotWithUnits> spotsWithUsage, int unitsNeeded)
+    private Task<bool> AssignMotorcycleSpotAsync(ParkingSession session, IQueryable<ParkingSpotWithUnitsV2> spotsWithUsage, int unitsNeeded)
     {
-        // Fill already used spots first (with 1-2 motorcycles), then fill empty spot
+        // Fyll först och främst MC på p-platser med andra MC (UsedUnits=2 väljs före 1, som väljs före 0) 
         var mcSpot = spotsWithUsage
-            .Where(s => s.FreeUnits >= 1)
+            .Where(s => !s.Spot.IsBlocked && s.FreeUnits >= 1)
             .OrderByDescending(s => s.UsedUnits)
             .ThenBy(s => s.Spot.SpotNumber)
             .FirstOrDefault();
 
-        if (mcSpot != null)
-        {
-            var vehicleSpot = new VehicleSpot
-            {
-                ParkedVehicleId = vehicle.Id,
-                ParkingSpotId = mcSpot.Spot.Id,
-                UnitsUsed = unitsNeeded
-            };
-            _context.VehicleSpots.Add(vehicleSpot);
-            return true;
-        }
+        if (mcSpot is null) return Task.FromResult(false);
 
-        return false;
+        _context.VehicleParkings.Add(new VehicleParking
+        {
+            ParkingSessionId = session.Id,
+            ParkingSpotV2Id = mcSpot.Spot.Id,
+            UnitsUsed = unitsNeeded // 1 för MC
+        });
+
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> AssignCarSpotAsync(ParkedVehicle vehicle, IQueryable<ParkingSpotWithUnits> spotsWithUsage, int unitsNeeded)
+    private Task<bool> AssignCarSpotAsync(ParkingSession session, IQueryable<ParkingSpotWithUnitsV2> spotsWithUsage, int unitsNeeded)
     {
         var carSpot = spotsWithUsage
-            .Where(s => s.UsedUnits == 0 && s.Spot.CapacityUnits >= 3)
+            .Where(s => !s.Spot.IsBlocked && s.UsedUnits == 0 && s.Spot.CapacityUnits >= 3)
             .OrderBy(s => s.Spot.SpotNumber)
             .FirstOrDefault();
 
-        if (carSpot != null)
-        {
-            var vehicleSpot = new VehicleSpot
-            {
-                ParkedVehicleId = vehicle.Id,
-                ParkingSpotId = carSpot.Spot.Id,
-                UnitsUsed = unitsNeeded
-            };
-            _context.VehicleSpots.Add(vehicleSpot);
-            return true;
-        }
+        if (carSpot is null) return Task.FromResult(false);
 
-        return false;
+        _context.VehicleParkings.Add(new VehicleParking
+        {
+            ParkingSessionId = session.Id,
+            ParkingSpotV2Id = carSpot.Spot.Id,
+            UnitsUsed = unitsNeeded // 3 för bil
+        });
+
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> AssignBusSpotAsync(ParkedVehicle vehicle, IQueryable<ParkingSpotWithUnits> spotsWithUsage)
+    private Task<bool> AssignBusSpotAsync(ParkingSession session, IQueryable<ParkingSpotWithUnitsV2> spotsWithUsage)
     {
         var freeSpots = spotsWithUsage
-            .Where(s => s.UsedUnits == 0)
+            .Where(s => !s.Spot.IsBlocked && s.UsedUnits == 0)
             .OrderBy(s => s.Spot.SpotNumber)
             .Select(s => s.Spot)
             .ToList();
 
-        var consecutiveSpots = FindConsecutiveSpots(freeSpots, 2);
+        var consecutiveSpots = FindConsecutiveSpots(freeSpots, requiredSpots: 2);
+        if (consecutiveSpots is null) return Task.FromResult(false);
 
-        if (consecutiveSpots != null)
+        foreach (var spot in consecutiveSpots)
         {
-            foreach (var spot in consecutiveSpots)
+            _context.VehicleParkings.Add(new VehicleParking
             {
-                _context.VehicleSpots.Add(new VehicleSpot
-                {
-                    ParkedVehicleId = vehicle.Id,
-                    ParkingSpotId = spot.Id,
-                    UnitsUsed = 3
-                });
-            }
-            return true;
+                ParkingSessionId = session.Id,
+                ParkingSpotV2Id = spot.Id,
+                UnitsUsed = 3
+            });
         }
 
-        return false;
+        return Task.FromResult(true);
     }
 
-    private async Task<bool> AssignBoatSpotAsync(ParkedVehicle vehicle, IQueryable<ParkingSpotWithUnits> spotsWithUsage)
+    private Task<bool> AssignBoatSpotAsync(ParkingSession session, IQueryable<ParkingSpotWithUnitsV2> spotsWithUsage)
     {
         var freeSpots = spotsWithUsage
-            .Where(s => s.UsedUnits == 0)
+            .Where(s => !s.Spot.IsBlocked && s.UsedUnits == 0)
             .OrderBy(s => s.Spot.SpotNumber)
             .Select(s => s.Spot)
             .ToList();
 
-        var consecutiveSpots = FindConsecutiveSpots(freeSpots, 3);
+        var consecutiveSpots = FindConsecutiveSpots(freeSpots, requiredSpots: 3);
+        if (consecutiveSpots is null) return Task.FromResult(false);
 
-        if (consecutiveSpots != null)
+        foreach (var spot in consecutiveSpots)
         {
-            foreach (var spot in consecutiveSpots)
+            _context.VehicleParkings.Add(new VehicleParking
             {
-                _context.VehicleSpots.Add(new VehicleSpot
-                {
-                    ParkedVehicleId = vehicle.Id,
-                    ParkingSpotId = spot.Id,
-                    UnitsUsed = 3
-                });
-            }
-            return true;
+                ParkingSessionId = session.Id,
+                ParkingSpotV2Id = spot.Id,
+                UnitsUsed = 3
+            });
         }
 
-        return false;
+        return Task.FromResult(true);
     }
 
-    private int GetUnitsForVehicle(VehicleType type)
-    {
-        return type switch
-        {
-            VehicleType.Motorcycle => 1,
-            VehicleType.Car => 3,
-            VehicleType.Bus => 6,
-            VehicleType.Boat => 9,
-            _ => throw new NotImplementedException($"Vehicle type {type} is not supported.")
-        };
-    }
-
-    private List<ParkingSpot>? FindConsecutiveSpots(List<ParkingSpot> freeSpots, int requiredSpots)
+    private static List<ParkingSpotV2>? FindConsecutiveSpots(List<ParkingSpotV2> freeSpots, int requiredSpots)
     {
         for (int i = 0; i <= freeSpots.Count - requiredSpots; i++)
         {
@@ -199,5 +223,13 @@ public class ParkingService : IParkingService
                 return slice;
         }
         return null;
+    }
+
+    // Intern klass för beläggningsberäkning (ParkingSpotV2 + units)
+    private sealed class ParkingSpotWithUnitsV2
+    {
+        public ParkingSpotV2 Spot { get; set; } = default!;
+        public int UsedUnits { get; set; }
+        public int FreeUnits { get; set; }
     }
 }

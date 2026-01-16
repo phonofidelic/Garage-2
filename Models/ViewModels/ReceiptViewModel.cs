@@ -1,23 +1,23 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Garage_2.Models.ViewModels
+public class ReceiptViewModel
 {
-    public class ReceiptViewModel
-    {
-        [Display(Name = "Registration number")]
-        public string RegistrationNumber { get; set; }
-        public VehicleType Type { get; set; }
+    [Display(Name = "Registration number")]
+    public string RegistrationNumber { get; set; } = default!;
 
-        [Display(Name = "Arrival time")]
-        public DateTime ArrivalTime { get; set; }
-        [Display(Name = "Checkout time")]
-        public DateTime CheckoutTime { get; set; }
+    public string Type { get; set; } = default!;
 
-        [Display(Name = "Parking duration")]
-        public TimeSpan ParkingDuration { get; set; }
+    [Display(Name = "Arrival time")]
+    public DateTime ArrivalTime { get; set; }
 
-        public decimal Price { get; set; }
+    [Display(Name = "Checkout time")]
+    public DateTime CheckoutTime { get; set; }
 
-        public List<int> ParkingSpots { get; set; } = new();
-    }
+    [Display(Name = "Parking duration")]
+    public TimeSpan ParkingDuration { get; set; }
+
+    public decimal Price { get; set; }
+
+    public List<int> ParkingSpots { get; set; } = new();
 }
+
