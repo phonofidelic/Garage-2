@@ -59,8 +59,7 @@
            style="top: 108px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 118px }">
         <tr>
             <th td class="text-nowrap">
-                <a
-                    asp-controller="ParkedVehicles"
+                <a asp-controller="Vehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.RegistrationNumber)"
                     asp-route-order="@GetSortOrder(OverviewSortBy.RegistrationNumber)"
@@ -75,7 +74,7 @@
             </th>
             <th td class="text-nowrap">
                 <a
-                    asp-controller="ParkedVehicles"
+                    asp-controller="Vehicles"
                     asp-action="Index"
                     asp-route-sortBy="@nameof(Model.OverviewItem.ArrivalTime)"
                     asp-route-order="@GetSortOrder(OverviewSortBy.ArrivalTime)"
@@ -89,7 +88,7 @@
                 }
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles"
+                <a asp-controller="Vehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.Type)"
                    asp-route-order="@GetSortOrder(OverviewSortBy.Type)"
@@ -103,7 +102,7 @@
                 }
             </th>
             <th td class="text-nowrap">
-                <a asp-controller="ParkedVehicles"
+                <a asp-controller="Vehicles"
                    asp-action="Index"
                    asp-route-sortBy="@nameof(Model.OverviewItem.ParkedTime)"
                    asp-route-order="@GetSortOrder(OverviewSortBy.ParkedTime)"
