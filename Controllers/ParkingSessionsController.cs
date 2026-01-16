@@ -9,6 +9,7 @@ using Garage_2.Data;
 using Garage_2.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Garage_2.Models.ViewModels.ParkingSessions;
+using Garage_2.Interfaces;
 
 namespace Garage_2.Controllers
 {
@@ -16,10 +17,14 @@ namespace Garage_2.Controllers
     public class ParkingSessionsController : Controller
     {
         private readonly GarageContext _context;
+        private readonly IParkingSessionService _parkingSessionService;
 
-        public ParkingSessionsController(GarageContext context)
+        public ParkingSessionsController(
+            GarageContext context,
+            IParkingSessionService parkingSessionService)
         {
             _context = context;
+            _parkingSessionService = parkingSessionService;
         }
 
         // GET: ParkingSessions
@@ -33,14 +38,18 @@ namespace Garage_2.Controllers
             {
                 viewModel.ParkingSessionsList = await _context.ParkingSessions
                 .Include(p => p.Vehicle)
-                .Select(s => new ParkingSessionsListItemViewModel
+                    .ThenInclude(v => v.VehicleType)
+                .Include(ps => ps.VehicleParkings)
+                    .ThenInclude(vp => vp.ParkingSpotV2)
+                .Select(parkingSession => new ParkingSessionsListItemViewModel()
                 {
-                    Id = s.Id,
-                    VehicleId = s.VehicleId,
-                    VehicleType = s.Vehicle.VehicleType.Name,
-                    RegistrationNumber = s.Vehicle.RegistrationNumber,
-                    ArrivalTime = s.ArrivalTime,
-                    DepartureTime = s.DepartureTime
+                    Id = parkingSession.Id,
+                    VehicleId = parkingSession.VehicleId,
+                    VehicleType = parkingSession.Vehicle.VehicleType.Name,
+                    RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
+                    ArrivalTime = parkingSession.ArrivalTime,
+                    DepartureTime = parkingSession.DepartureTime,
+                    TotalCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now)
                 })
                 .ToListAsync();
             }
