@@ -11,28 +11,28 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
+            <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.VehicleType)
             </th>
             @if (User.IsInRole("Admin"))
             {
-                <th>
+                <th class="text-nowrap">
                     @Html.DisplayNameFor(model => model.ListParameters.VehicleOwner)
                 </th>
             }
-            <th>
+            <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.RegistrationNumber)
             </th>
-            <th>
+            <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.ArrivalTime)
             </th>
-            <th>
+            <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.ParkedTime)
             </th>
-            <th>
+            <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.DepartureTime)
             </th>
-            <th>
+            <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.TotalCost)
             </th>
             <th></th>
@@ -42,31 +42,31 @@
         @foreach (var item in Model.ParkingSessionsList)
         {
             <tr>
-                <th>
+                <td class="text-nowrap">
                     @Html.DisplayFor(model => item.VehicleType)
-                </th>
+                </td>
                 @if (User.IsInRole("Admin"))
                 {
-                    <th>
+                    <td>
                         @Html.DisplayFor(model => item.VehicleOwner)
-                    </th>
+                    </td>
                 }
-                <th>
+                <td class="text-nowrap">
                     @Html.DisplayFor(model => item.RegistrationNumber)
-                </th>
-                <th>
+                </td>
+                <td class="text-nowrap">
                     @Html.DisplayFor(model => item.ArrivalTime)
-                </th>
-                <th>
+                </td>
+                <td class="text-nowrap">
                     @Html.DisplayFor(model => item.ParkedTime)
-                </th>
-                <th>
+                </td>
+                <td class="text-nowrap">
                     @Html.DisplayFor(model => item.DepartureTime)
-                </th>
-                <th>
+                </td>
+                <td class="text-nowrap">
                     @Html.DisplayFor(model => item.TotalCost)
-                </th>
-                <td>
+                </td>
+                <td class="text-nowrap">
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
