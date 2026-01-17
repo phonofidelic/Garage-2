@@ -20,11 +20,13 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
         public DateTime ArrivalTime { get; set; }
 
         [Display(Name = "Parked time")]
-        [DataType(DataType.Time)]
+        [DataType(DataType.Duration)]
         [DisplayFormat(DataFormatString = "{0:hh\\:mm}")]
         public TimeSpan? ParkedTime => (DepartureTime ?? DateTime.Now) - ArrivalTime;
         
         [Display(Name = "Checkout time")]
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(NullDisplayText = "-")]
         public DateTime? DepartureTime { get; set; }
 
         [Display(Name = "Total cost")]
