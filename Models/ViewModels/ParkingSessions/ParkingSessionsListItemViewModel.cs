@@ -21,7 +21,7 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
 
         [Display(Name = "Parked time")]
         [DataType(DataType.Time)]
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:hh\\:mm}")]
+        [DisplayFormat(DataFormatString = "{0:hh\\:mm}")]
         public TimeSpan? ParkedTime => (DepartureTime ?? DateTime.Now) - ArrivalTime;
         
         [Display(Name = "Checkout time")]

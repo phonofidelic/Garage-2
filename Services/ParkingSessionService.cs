@@ -1,6 +1,5 @@
 ﻿using Garage_2.Interfaces;
 using Garage_2.Models.Entities;
-using Garage_2.Models.ViewModels.ParkingSessions;
 using Microsoft.Extensions.Options;
 
 namespace Garage_2.Services
