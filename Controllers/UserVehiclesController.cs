@@ -1,11 +1,15 @@
 ﻿using Garage_2.Data;
 using Garage_2.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Garage_2.Controllers
 {
+    [Authorize]
     public class UserVehiclesController : Controller
     {
         private readonly GarageContext _context;
@@ -26,8 +30,23 @@ namespace Garage_2.Controllers
             const int pageSize = 15;
             var now = DateTime.Now;
 
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
             // 1) Baslista users (med vehicle count)
             var usersQuery = _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new
+                {
+                    u.Id,
+                    FullName = (u.FirstName + " " + u.LastName).Trim(),
+                    u.Email,
+                    VehicleCount = u.Vehicles.Count
+                });
+
+            if (User.IsInRole("Admin"))
+            {
+                usersQuery = _context.Users
                 .AsNoTracking()
                 .Select(u => new
                 {
@@ -36,6 +55,7 @@ namespace Garage_2.Controllers
                     u.Email,
                     VehicleCount = u.Vehicles.Count
                 });
+            }
 
             // 2) Sök (name/email)
             if (!string.IsNullOrWhiteSpace(searchString))
