@@ -1,4 +1,5 @@
-﻿@model ParkingSessionsIndexViewModel
+﻿@using Garage_2.Extensions
+@model ParkingSessionsIndexViewModel
 @{
     ViewData["Title"] = Model.PageTitle;
 }
@@ -16,28 +17,92 @@
     <thead>
         <tr>
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.VehicleType)
+                <a asp-route-sortBy="@ParkingSessionsSortBy.VehicleType"
+                    asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.VehicleType)">
+                    @Html.DisplayNameFor(model => model.ListParameters.VehicleType)
+                </a>
+                @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.VehicleType)
+                {
+                    <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                        &#9650;
+                    </div>
+                }
             </th>
             @if (Model.IsAdmin)
             {
                 <th class="text-nowrap">
-                    @Html.DisplayNameFor(model => model.ListParameters.VehicleOwner)
+                    <a asp-route-sortBy="@ParkingSessionsSortBy.VehicleOwner"
+                        asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.VehicleOwner)">
+                        @Html.DisplayNameFor(model => model.ListParameters.VehicleOwner)
+                    </a>
+                    @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.VehicleOwner)
+                    {
+                        <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                            &#9650;
+                        </div>
+                    }
                 </th>
             }
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.RegistrationNumber)
+                <a asp-route-sortBy="@ParkingSessionsSortBy.RegistrationNumber"
+                    asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.RegistrationNumber)">
+                    @Html.DisplayNameFor(model => model.ListParameters.RegistrationNumber)
+                </a>
+                @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.RegistrationNumber)
+                {
+                    <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                        &#9650;
+                    </div>
+                }
             </th>
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.ArrivalTime)
+                <a asp-route-sortBy="@ParkingSessionsSortBy.ArrivalTime"
+                    asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.ArrivalTime)">
+                    @Html.DisplayNameFor(model => model.ListParameters.ArrivalTime)
+                </a>
+                @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.ArrivalTime)
+                {
+                    <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                        &#9650;
+                    </div>
+                }
             </th>
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.ParkedTime)
+                <a asp-route-sortBy="@ParkingSessionsSortBy.ParkedTime"
+                    asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.ParkedTime)">
+                    @Html.DisplayNameFor(model => model.ListParameters.ParkedTime)
+                </a>
+                @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.ParkedTime)
+                {
+                    <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                        &#9650;
+                    </div>
+                }
             </th>
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.DepartureTime)
+                <a asp-route-sortBy="@ParkingSessionsSortBy.DepartureTime"
+                    asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.DepartureTime)">
+                    @Html.DisplayNameFor(model => model.ListParameters.DepartureTime)
+                </a>
+                @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.DepartureTime)
+                {
+                    <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                        &#9650;
+                    </div>
+                }
             </th>
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.CurrentCost) @(Model.IsAdmin ? "Revenue" : "Cost")
+                <a asp-route-sortBy="@ParkingSessionsSortBy.CurrentCost"
+                    asp-route-order="@Model.ListParameters.GetSortOrder(ParkingSessionsSortBy.CurrentCost)">
+                    @Html.DisplayNameFor(model => model.ListParameters.CurrentCost)
+                    @(Model.IsAdmin ? "Revenue" : "Cost")
+                </a>
+                @if (Model.ListParameters.SortBy == ParkingSessionsSortBy.CurrentCost)
+                {
+                    <div class="text-primary" style="@Model.ListParameters.SortOrder.GetSortOrderIndicatorStyle()">
+                        &#9650;
+                    </div>
+                }
             </th>
             <th></th>
         </tr>

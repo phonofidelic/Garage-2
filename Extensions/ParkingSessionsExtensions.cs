@@ -24,16 +24,16 @@ public static class ParkingSessionsExtensions
             (ParkingSessionsSortBy.RegistrationNumber, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.RegistrationNumber),
             (ParkingSessionsSortBy.RegistrationNumber, _) => parkingSessionsList.OrderBy(ps => ps.RegistrationNumber),
 
-            (ParkingSessionsSortBy.StartTime, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.ArrivalTime),
-            (ParkingSessionsSortBy.StartTime, _) => parkingSessionsList.OrderBy(ps => ps.ArrivalTime),
+            (ParkingSessionsSortBy.ArrivalTime, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.ArrivalTime),
+            (ParkingSessionsSortBy.ArrivalTime, _) => parkingSessionsList.OrderBy(ps => ps.ArrivalTime),
 
-            (ParkingSessionsSortBy.CheckoutTime, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.DepartureTime),
-            (ParkingSessionsSortBy.CheckoutTime, _) => parkingSessionsList.OrderBy(ps => ps.DepartureTime),
+            (ParkingSessionsSortBy.DepartureTime, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.DepartureTime),
+            (ParkingSessionsSortBy.DepartureTime, _) => parkingSessionsList.OrderBy(ps => ps.DepartureTime),
 
             (ParkingSessionsSortBy.CurrentCost, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.CurrentCost),
             (ParkingSessionsSortBy.CurrentCost, _) => parkingSessionsList.OrderBy(ps => ps.CurrentCost),
 
-            (ParkingSessionsSortBy.Duration, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.ParkedTime),
+            (ParkingSessionsSortBy.ParkedTime, SortOrder.Descending) => parkingSessionsList.OrderByDescending(ps => ps.ParkedTime),
             _ => parkingSessionsList.OrderBy(ps => ps.ParkedTime),
         };
     }
@@ -45,5 +45,19 @@ public static class ParkingSessionsExtensions
             : "transform: rotate(0.5turn);";
 
         return rotation + " display: inline-block; width: 1rem; line-height: 1rem; text-align: center; font-size: 0.75rem";
+    }
+
+    public static SortOrder Toggle(this SortOrder sortOrder)
+    {
+        return sortOrder == SortOrder.Ascending 
+            ? SortOrder.Descending
+            : SortOrder.Ascending;
+    }
+
+    public static SortOrder GetSortOrder(this ParkingSessionsListParameters listParameters, ParkingSessionsSortBy sortBy)
+    {
+        return listParameters.SortBy == sortBy
+        ? listParameters.SortOrder.Toggle()
+        : SortOrder.Ascending;
     }
 }
