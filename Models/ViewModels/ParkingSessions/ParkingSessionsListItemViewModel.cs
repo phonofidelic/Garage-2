@@ -6,6 +6,8 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
     {
         public int Id { get; set; }
         public int VehicleId { get; set; }
+        
+        public bool IsAdmin { get; set; }
 
         [Display(Name = "Vehicle type")]
         public string VehicleType { get; set; } = default!;
@@ -29,8 +31,8 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
         [DisplayFormat(NullDisplayText = "-")]
         public DateTime? DepartureTime { get; set; }
 
-        [Display(Name = "Total cost")]
+        [Display(Name = "Current")]
         [DataType(DataType.Currency)]
-        public decimal TotalCost { get; set; }
+        public decimal CurrentCost { get; set; }
     }
 }

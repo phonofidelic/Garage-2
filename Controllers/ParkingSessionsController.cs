@@ -35,57 +35,37 @@ namespace Garage_2.Controllers
 
             ParkingSessionsIndexViewModel viewModel = new();
 
-            var parkingSessions = _context.ParkingSessions
+            bool isAdmin = User.IsInRole("Admin");
+            
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            
+            viewModel.IsAdmin = isAdmin;
+            
+            viewModel.ParkingSessionsList = await _context.ParkingSessions
                 .Include(ps => ps.VehicleParkings)
-                    .ThenInclude(vp => vp.ParkingSpotV2);
-
-            if (User.IsInRole("User"))
+                    .ThenInclude(vp => vp.ParkingSpotV2)
+                .Include(p => p.Vehicle)
+                    .ThenInclude(v => v.VehicleType)
+                .Include(p => p.Vehicle)
+                    .ThenInclude(v => v.User)
+                .Where(ps => isAdmin || ps.Vehicle.ApplicationUserId == userId)
+                .Select(parkingSession => new ParkingSessionsListItemViewModel()
             {
-                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-                var userParkingSessions = parkingSessions
-                    .Include(p => p.Vehicle)
-                        .ThenInclude(v => v.VehicleType)
-                    .Where(ps => ps.Vehicle.ApplicationUserId == userId);
+                Id = parkingSession.Id,
+                VehicleId = parkingSession.VehicleId,
+                IsAdmin = isAdmin,
+                VehicleOwner = parkingSession.Vehicle.User.UserName ?? "",
+                VehicleType = parkingSession.Vehicle.VehicleType.Name,
+                RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
+                ArrivalTime = parkingSession.ArrivalTime,
+                DepartureTime = parkingSession.DepartureTime,
+                CurrentCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now)
+            })
+            .ToListAsync();
 
-                viewModel.ParkingSessionsList = await userParkingSessions
-                    .Select(parkingSession => new ParkingSessionsListItemViewModel()
-                    {
-                        Id = parkingSession.Id,
-                        VehicleId = parkingSession.VehicleId,
-                        VehicleType = parkingSession.Vehicle.VehicleType.Name,
-                        RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
-                        ArrivalTime = parkingSession.ArrivalTime,
-                        DepartureTime = parkingSession.DepartureTime,
-                        TotalCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now)
-                    })
-                    .ToListAsync();
-
-                return View(viewModel);
-            }
-
-            if (User.IsInRole("Admin"))
-            {
-                viewModel.ParkingSessionsList = await parkingSessions
-                    .Include(p => p.Vehicle)
-                        .ThenInclude(v => v.VehicleType)
-                    .Include(p => p.Vehicle)
-                        .ThenInclude(v => v.User)
-                    .Select(parkingSession => new ParkingSessionsListItemViewModel()
-                {
-                    Id = parkingSession.Id,
-                    VehicleId = parkingSession.VehicleId,
-                    VehicleOwner = parkingSession.Vehicle.User.UserName ?? "",
-                    VehicleType = parkingSession.Vehicle.VehicleType.Name,
-                    RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
-                    ArrivalTime = parkingSession.ArrivalTime,
-                    DepartureTime = parkingSession.DepartureTime,
-                    TotalCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now)
-                })
-                .ToListAsync();
-            }
-           
+            viewModel.CurrentTotal = viewModel.ParkingSessionsList.Sum(ps => ps.CurrentCost);
+            
             return View(viewModel);
-
         }
 
         // GET: ParkingSessions/Details/5
