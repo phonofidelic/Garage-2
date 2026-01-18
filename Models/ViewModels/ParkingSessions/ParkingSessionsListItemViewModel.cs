@@ -6,8 +6,6 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
     {
         public int Id { get; set; }
         public int VehicleId { get; set; }
-        
-        public bool IsAdmin { get; set; }
 
         [Display(Name = "Vehicle type")]
         public string VehicleType { get; set; } = default!;

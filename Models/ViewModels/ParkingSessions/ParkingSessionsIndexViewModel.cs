@@ -10,7 +10,7 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
 
         public ParkingSessionsListParameters ListParameters { get; set; } = default!;
 
-        public List<ParkingSessionsListItemViewModel> ParkingSessionsList { get; set; } = [];
+        public IEnumerable<ParkingSessionsListItemViewModel> ParkingSessionsList { get; set; } = [];
 
         [DataType(DataType.Currency)]
         public decimal CurrentTotal { get; set; }
