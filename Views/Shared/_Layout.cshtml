@@ -32,6 +32,15 @@
 							   asp-action="GarageStatsOverview">Garage Statistics</a>
                         </li>
 
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="ParkingSpots"
+                                   asp-action="Index">Manage Spots</a>
+                            </li>
+                        }
+
                         <li class="nav-item ms-0 ms-sm-auto">
                             <a class="nav-link text-dark"
                                asp-controller="Vehicles"
