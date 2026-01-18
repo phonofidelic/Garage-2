@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 using Garage_2.Models.ViewModels.ParkingSessions;
 using Garage_2.Interfaces;
 using System.Security.Claims;
+using Garage_2.Models.ViewModels;
+using Microsoft.Data.SqlClient;
+using Garage_2.Extensions;
 
 namespace Garage_2.Controllers
 {
@@ -29,41 +32,55 @@ namespace Garage_2.Controllers
         }
 
         // GET: ParkingSessions
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            [FromQuery(Name = "sortBy")] ParkingSessionsSortBy sortBy = ParkingSessionsSortBy.Duration,
+            [FromQuery(Name = "order")] SortOrder order = SortOrder.Ascending,
+            [FromQuery(Name = "limit")] int limit = 50,
+            [FromQuery(Name = "page")] int page = 1
+        )
         {
+            ParkingSessionsListParameters listParameters = new()
+            {
+                SortBy = sortBy,
+                SortOrder = order
+            };
+
             var garageContext = _context.ParkingSessions.Include(p => p.Vehicle);
-
-            ParkingSessionsIndexViewModel viewModel = new();
-
             bool isAdmin = User.IsInRole("Admin");
-            
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
             
-            viewModel.IsAdmin = isAdmin;
-            
-            viewModel.ParkingSessionsList = await _context.ParkingSessions
+            IQueryable<ParkingSession> parkingSessionsQuery = _context.ParkingSessions
                 .Include(ps => ps.VehicleParkings)
                     .ThenInclude(vp => vp.ParkingSpotV2)
                 .Include(p => p.Vehicle)
                     .ThenInclude(v => v.VehicleType)
                 .Include(p => p.Vehicle)
                     .ThenInclude(v => v.User)
-                .Where(ps => isAdmin || ps.Vehicle.ApplicationUserId == userId)
-                .Select(parkingSession => new ParkingSessionsListItemViewModel()
+                .Where(ps => isAdmin || ps.Vehicle.ApplicationUserId == userId);
+
+            IEnumerable<ParkingSessionsListItemViewModel> parkingSessionsListItems = await parkingSessionsQuery.Select(parkingSession => new ParkingSessionsListItemViewModel()
             {
                 Id = parkingSession.Id,
                 VehicleId = parkingSession.VehicleId,
-                IsAdmin = isAdmin,
                 VehicleOwner = parkingSession.Vehicle.User.UserName ?? "",
                 VehicleType = parkingSession.Vehicle.VehicleType.Name,
                 RegistrationNumber = parkingSession.Vehicle.RegistrationNumber,
                 ArrivalTime = parkingSession.ArrivalTime,
                 DepartureTime = parkingSession.DepartureTime,
-                CurrentCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now)
+                CurrentCost = _parkingSessionService.GetTotalParkingSessionCost(parkingSession, DateTime.Now),
             })
             .ToListAsync();
 
-            viewModel.CurrentTotal = viewModel.ParkingSessionsList.Sum(ps => ps.CurrentCost);
+            // SortByWithOrder extension defined in Extensions/ParkingSessionsExtensions
+            var orderedParkingSessionsListItems = parkingSessionsListItems.SortByWithOrder(sortBy, order);
+
+            ParkingSessionsIndexViewModel viewModel = new()
+            {
+                IsAdmin = isAdmin,
+                ListParameters = listParameters,
+                ParkingSessionsList = orderedParkingSessionsListItems,
+                CurrentTotal = parkingSessionsListItems.Sum(ps => ps.CurrentCost)
+            };
             
             return View(viewModel);
         }
