@@ -1,4 +1,6 @@
 ﻿using Garage_2.Data;
+using Garage_2.Models;
+using Garage_2.Models.Entities;
 using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -146,6 +148,42 @@ namespace Garage_2.Controllers
 
             return View(vm);
         }
+
+        // GET: UserVehicles/Details/5
+        // Visa alla användarens registrerade fordon, samt fordonsinformation.
+
+        public async Task<IActionResult> Details(string? id, string? searchString)
+        {
+
+            if (string.IsNullOrWhiteSpace(id))
+                return RedirectToAction(nameof(Index));
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user is null)
+            {
+                TempData["AlertType"] = AlertType.warning;
+                TempData["AlertMessage"] = "User not found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userVehicles = await _context.Vehicles
+                .AsNoTracking()
+                .Where(v => v.ApplicationUserId == id)
+                .Include(v => v.VehicleType)
+                .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null))
+                    .ThenInclude(ps => ps.VehicleParkings)
+                        .ThenInclude(vp => vp.ParkingSpotV2)
+                .AsSplitQuery()
+                .ToListAsync();
+
+            return View(new UserVehicleViewModel(user, userVehicles));
+        }
+
 
         private decimal CalculatePriceNow(DateTime arrivalTime, int unitsUsed, DateTime now)
         {
