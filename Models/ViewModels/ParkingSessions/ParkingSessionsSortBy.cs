@@ -14,13 +14,13 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
         RegistrationNumber,
 
         [Display(Name = "Start time")]
-        StartTime,
-        
+        ArrivalTime,
+
         [Display(Name = "Parked time")]
-        Duration,
+        ParkedTime,
 
         [Display(Name = "Checkout time")]
-        CheckoutTime,
+        DepartureTime,
 
         [Display(Name = "Cost")]
         CurrentCost
