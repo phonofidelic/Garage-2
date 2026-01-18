@@ -1,13 +1,14 @@
 ﻿using Garage_2.Data;
 using Garage_2.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Garage_2.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ParkingSpotsController : Controller
     {
-        //[Authorize(Roles = "Admin")] 
         private readonly GarageContext _context;
 
         public ParkingSpotsController(GarageContext context)
