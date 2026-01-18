@@ -3,7 +3,14 @@
     ViewData["Title"] = Model.PageTitle;
 }
 
-<h1>@Model.PageTitle</h1>
+<header>
+    <div class="d-flex w-100 align-items-baseline gap-3">
+        <h1>@Model.PageTitle</h1>
+        <div>
+            Current total @(Model.IsAdmin ? "revenue" : "cost"): @Html.DisplayFor(model => model.CurrentTotal)
+        </div>
+    </div>
+</header>
 
 <table class="table">
     <thead>
@@ -11,7 +18,7 @@
             <th class="text-nowrap">
                 @Html.DisplayNameFor(model => model.ListParameters.VehicleType)
             </th>
-            @if (User.IsInRole("Admin"))
+            @if (Model.IsAdmin)
             {
                 <th class="text-nowrap">
                     @Html.DisplayNameFor(model => model.ListParameters.VehicleOwner)
@@ -30,7 +37,7 @@
                 @Html.DisplayNameFor(model => model.ListParameters.DepartureTime)
             </th>
             <th class="text-nowrap">
-                @Html.DisplayNameFor(model => model.ListParameters.TotalCost)
+                @Html.DisplayNameFor(model => model.ListParameters.CurrentCost) @(Model.IsAdmin ? "Revenue" : "Cost")
             </th>
             <th></th>
         </tr>
@@ -42,7 +49,7 @@
                 <td class="text-nowrap">
                     @Html.DisplayFor(model => item.VehicleType)
                 </td>
-                @if (User.IsInRole("Admin"))
+                @if (Model.IsAdmin)
                 {
                     <td>
                         @Html.DisplayFor(model => item.VehicleOwner)
@@ -61,7 +68,7 @@
                     @Html.DisplayFor(model => item.DepartureTime)
                 </td>
                 <td class="text-nowrap">
-                    @Html.DisplayFor(model => item.TotalCost)
+                    @Html.DisplayFor(model => item.CurrentCost)
                 </td>
                 <td class="text-nowrap">
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
