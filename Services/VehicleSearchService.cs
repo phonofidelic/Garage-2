@@ -60,10 +60,11 @@ public class VehicleSearchService : IVehicleSearchService
         if (!DateTime.TryParse(search, out var date))
             return query.Where(_ => false);
 
-        var targetDate = date.Date;
+        var start = date.Date;
+        var end = start.AddDays(1);
 
         return query.Where(v =>
-            v.ParkingSessions.Any(ps => ps.ArrivalTime.Date == targetDate));
+            v.ParkingSessions.Any(ps => ps.ArrivalTime >= start && ps.ArrivalTime < end && ps.DepartureTime == null));
     }
 
     private IQueryable<Vehicle> FilterAllFields(IQueryable<Vehicle> query, string search)
