@@ -12,6 +12,7 @@
     <thead>
         <tr>
             <th>Parking number</th>
+            <th>Occupancy</th>
             <th>Status</th>
             <th>Capacity</th>
         </tr>
@@ -19,8 +20,26 @@
     <tbody>
         @foreach (var item in Model)
         {
+            var occupiedUnits = item.VehicleParkings
+            .Where(vp => vp.ParkingSession.DepartureTime == null)
+            .Sum(vp => vp.UnitsUsed);
             <tr>
                 <td>@item.SpotNumber</td>
+
+                <td>
+                    @if (occupiedUnits == 0)
+                    {
+                        <span class="text-muted">Empty</span>
+                    }
+                    else if (occupiedUnits >= item.CapacityUnits)
+                    {
+                        <span style="color:red; font-weight:bold;">Full</span>
+                    }
+                    else
+                    {
+                        <span class="text-primary">@occupiedUnits / @item.CapacityUnits</span>
+                    }
+                </td>
 
                 <td>
                     @if (item.IsBlocked)
