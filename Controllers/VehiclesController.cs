@@ -351,7 +351,7 @@ namespace Garage_2.Controllers
             DateTime.TryParse(formattedDobString, out dob);
             int ageInYears = (DateTime.Now - dob).GetYears();
 
-            if (ageInYears < 18 && !User.IsInRole("Admin"))
+            if (ageInYears < _config.ParkingAgeRequirement && !User.IsInRole("Admin"))
             {
                 SetAlertInTempData(AlertType.warning, "You must be at least 18 to park a vehicle.");
                 return RedirectToAction(nameof(Index));

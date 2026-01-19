@@ -23,5 +23,8 @@ namespace Garage_2
 
         [Required]
         public string SystemCulture { get; set; } = string.Empty;
+
+        [Required]
+        public int ParkingAgeRequirement { get; set; }
     }
 }
