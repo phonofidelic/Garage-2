@@ -63,7 +63,7 @@ namespace Garage_2.Data
                 var createResult = await userManager.CreateAsync(admin, adminPassword);
                 if (!createResult.Succeeded)
                 {
-                    // Krass: faila tidigt så du ser vad som är fel (password policy osv)
+                    // Faila tidigt så man ser vad som är fel (password policy osv)
                     var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
                     throw new InvalidOperationException($"Failed to create admin user: {errors}");
                 }
@@ -127,7 +127,7 @@ namespace Garage_2.Data
             if (adminHasVehicles)
                 return;
 
-            // Hämta VehicleTypeId för varje typ (Names ska matcha dina seedade VehicleTypes)
+            // Hämta VehicleTypeId för varje typ (Names ska matcha seedade VehicleTypes)
             var typeIds = await context.VehicleTypes
                 .AsNoTracking()
                 .ToDictionaryAsync(t => t.Name, t => t.Id);
@@ -192,7 +192,7 @@ namespace Garage_2.Data
         }
     };
 
-            // DB har unik index på RegistrationNumber -> skydda mot krock om du ändrar logiken senare
+            // DB har unik index på RegistrationNumber -> skydda mot krock om logiken ändras senare
             var regNumbers = vehicles.Select(v => v.RegistrationNumber).ToList();
             var existingRegs = await context.Vehicles
                 .AsNoTracking()
