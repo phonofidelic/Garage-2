@@ -42,7 +42,9 @@
     style="top: 48px; @@media (min-width: 768px) { top: 57px }">
 
     <div class="container p-3 m">
-            <h4>Register vehicle</h4>
+        <h4>
+            @(User.IsInRole("Admin") ? "Registered vehicles" : "My vehicles")
+        </h4>
     </div>
    
     <div class="container d-flex p-3 px-4 gap-2">
