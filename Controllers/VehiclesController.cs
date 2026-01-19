@@ -323,7 +323,7 @@ namespace Garage_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Läs tillbaka aktiva sessionen + spots 
+            // Läs tillbaka aktiva sessionen + spots
             var activeSession = await _context.ParkingSessions
                 .AsNoTracking()
                 .Where(ps => ps.VehicleId == id && ps.DepartureTime == null)

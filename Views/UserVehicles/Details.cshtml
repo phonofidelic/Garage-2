@@ -1,0 +1,98 @@
+﻿@model Garage_2.Models.ViewModels.UserVehicleViewModel
+
+@{
+    ViewData["Title"] = "User details";
+    var fullName = $"{Model.User.FirstName} {Model.User.LastName}".Trim();
+}
+
+<div class="container">
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-1">@(!string.IsNullOrWhiteSpace(fullName) ? fullName : Model.User.UserName)</h2>
+            <div class="text-muted">
+                <div><strong>Username:</strong> @Model.User.UserName</div>
+                @if (!string.IsNullOrWhiteSpace(Model.User.Email))
+                {
+                    <div><strong>Email:</strong> @Model.User.Email</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.User.SSN))
+                {
+                    <div><strong>SSN:</strong> @Model.User.SSN</div>
+                }
+            </div>
+        </div>
+
+        <div class="text-end">
+            <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </div>
+
+    <hr />
+
+    <h4 class="mb-3">Registered vehicles (@Model.Vehicles.Count)</h4>
+
+    @if (Model.Vehicles == null || !Model.Vehicles.Any())
+    {
+        <div class="alert alert-info">
+            This user has no registered vehicles.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Reg. No</th>
+                        <th>Type</th>
+                        <th>Make</th>
+                        <th>Model</th>
+                        <th>Color</th>
+                        <th class="text-end">Wheels</th>
+                        <th>Currently parked</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model.Vehicles)
+                    {
+                        var activeSession = v.ParkingSessions?.FirstOrDefault();
+
+                        <tr>
+                            <td class="fw-semibold">@v.RegistrationNumber</td>
+                            <td>@v.VehicleType?.Name</td>
+                            <td>@v.Make</td>
+                            <td>@v.Model</td>
+                            <td>@v.Color</td>
+                            <td class="text-end">@v.NumberOfWheels</td>
+
+                            <td>
+                                @if (activeSession == null)
+                                {
+                                    <span class="badge bg-secondary">No</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Yes</span>
+
+                                    var spots = activeSession.VehicleParkings?
+                                    .Select(vp => vp.ParkingSpotV2)
+                                    .Where(ps => ps != null)
+                                    .ToList();
+
+                                    if (spots != null && spots.Any())
+                                    {
+                                        <div class="small text-muted mt-1">
+                                            Spots:
+                                            @string.Join(", ", spots.Select(s => s!.SpotNumber))
+                                        </div>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
