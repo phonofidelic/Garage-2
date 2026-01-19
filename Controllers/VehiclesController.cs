@@ -330,6 +330,13 @@ namespace Garage_2.Controllers
                 .Include(v => v.VehicleType)
                 .FirstOrDefaultAsync(v => v.Id == id && v.ApplicationUserId == userId);
 
+            if (User.IsInRole("Admin"))
+            {
+                vehicle = await _context.Vehicles
+                .Include(v => v.VehicleType)
+                .FirstOrDefaultAsync(v => v.Id == id);
+            }
+
             if (vehicle is null)
             {
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
