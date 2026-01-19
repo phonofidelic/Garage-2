@@ -1,3 +1,4 @@
+using System.Globalization;
 using Garage_2;
 using Garage_2.Data;
 using Garage_2.Interfaces;
@@ -19,10 +20,18 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddOptions<GarageConfig>()
     .BindConfiguration(nameof(GarageConfig))
     .ValidateDataAnnotations()
-    .ValidateOnStart();
+    .ValidateOnStart()
+    .PostConfigure(options =>
+    {
+        // Set system culture from config
+        CultureInfo systemCulture = new(options.SystemCulture);
+        CultureInfo.DefaultThreadCurrentCulture = systemCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = systemCulture;
+    });
 
 builder.Services.AddScoped<IVehicleSearchService, VehicleSearchService>();
 builder.Services.AddScoped<IParkingService, ParkingService>();
+builder.Services.AddScoped<IParkingSessionService, ParkingSessionService>();
 
 var app = builder.Build();
 
