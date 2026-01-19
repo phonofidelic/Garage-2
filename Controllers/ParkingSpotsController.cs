@@ -18,7 +18,11 @@ namespace Garage_2.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var spots = await _context.ParkingSpotV2.ToListAsync();
+            var spots = await _context.ParkingSpotV2
+                .Include(s => s.VehicleParkings)
+                .ThenInclude(vp => vp.ParkingSession)
+                .ToListAsync(); 
+            ;
 
             return View(spots);
         }
