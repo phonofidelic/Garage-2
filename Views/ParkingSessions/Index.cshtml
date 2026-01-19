@@ -4,17 +4,17 @@
     ViewData["Title"] = Model.PageTitle;
 }
 
-<header>
-    <div class="d-flex w-100 align-items-baseline gap-3">
-        <h1>@Model.PageTitle</h1>
-        <div>
-            Current total @(Model.IsAdmin ? "revenue" : "cost"): @Html.DisplayFor(model => model.CurrentTotal)
-        </div>
+<div class="position-fixed z-1 bg-body d-flex w-100 align-items-baseline gap-3"
+    style="top: 57px; @@media (min-width: 768px) { top: 57px }">
+    <h1>@Model.PageTitle</h1>
+    <div>
+        Current total @(Model.IsAdmin ? "revenue" : "cost"): @Html.DisplayFor(model => model.CurrentTotal)
     </div>
-</header>
+</div>
 
-<table class="table">
-    <thead>
+<table class="table" style="margin-top: 112px">
+    <thead class="position-sticky"
+        style="top: 103px; box-shadow: 0 4px 4px -4px rgba(0,0,0,0.2); @@media (min-width: 768px) { top: 112px }">
         <tr>
             <th class="text-nowrap">
                 <a asp-route-sortBy="@ParkingSessionsSortBy.VehicleType"
