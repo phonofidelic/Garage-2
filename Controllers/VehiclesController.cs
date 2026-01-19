@@ -191,6 +191,15 @@ namespace Garage_2.Controllers
                 .Include(v => v.ParkingSessions)
                 .FirstOrDefaultAsync(v => v.Id == id && v.ApplicationUserId == userId);
 
+            if (User.IsInRole("Admin"))
+            {
+                vehicle = await _context.Vehicles
+                .AsNoTracking()
+                .Include(v => v.VehicleType)
+                .Include(v => v.ParkingSessions)
+                .FirstOrDefaultAsync(v => v.Id == id);
+            }
+
             if (vehicle is null)
                 return NotFound();
 
@@ -367,6 +376,7 @@ namespace Garage_2.Controllers
             }
 
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            bool isAdmin = User.IsInRole("Admin");
 
             var activeSession = await _context.ParkingSessions
                 .AsNoTracking()
@@ -377,7 +387,7 @@ namespace Garage_2.Controllers
                     .ThenInclude(vp => vp.ParkingSpotV2)
                 .FirstOrDefaultAsync();
 
-            if (activeSession is null || activeSession.Vehicle.ApplicationUserId != userId)
+            if (activeSession is null || (!isAdmin && activeSession.Vehicle.ApplicationUserId != userId))
             {
                 SetAlertInTempData(AlertType.warning, "Active parking session not found.");
                 return RedirectToAction(nameof(Index));
@@ -392,6 +402,7 @@ namespace Garage_2.Controllers
         public async Task<IActionResult> UnparkConfirmed(int id) // id = VehicleId
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            bool isAdmin = User.IsInRole("Admin");
 
             var session = await _context.ParkingSessions
                 .Where(ps => ps.DepartureTime == null && ps.VehicleId == id)
@@ -401,7 +412,7 @@ namespace Garage_2.Controllers
                     .ThenInclude(vp => vp.ParkingSpotV2)
                 .FirstOrDefaultAsync();
 
-            if (session is null || session.Vehicle.ApplicationUserId != userId)
+            if (session is null || (!isAdmin && session.Vehicle.ApplicationUserId != userId))
             {
                 SetAlertInTempData(AlertType.warning, "Active parking session not found.");
                 return RedirectToAction(nameof(Index));
