@@ -155,6 +155,18 @@ namespace Garage_2.Controllers
                         .ThenInclude(vp => vp.ParkingSpotV2)
                 .FirstOrDefaultAsync();
 
+            if (User.IsInRole("Admin"))
+            {
+                vehicle = await _context.Vehicles
+                .AsNoTracking()
+                .Where(v => v.Id == id.Value)
+                .Include(v => v.VehicleType)
+                .Include(v => v.ParkingSessions.Where(ps => ps.DepartureTime == null))
+                    .ThenInclude(ps => ps.VehicleParkings)
+                        .ThenInclude(vp => vp.ParkingSpotV2)
+                .FirstOrDefaultAsync();
+            }
+
             if (vehicle is null)
             {
                 SetAlertInTempData(AlertType.warning, "Vehicle not found.");
