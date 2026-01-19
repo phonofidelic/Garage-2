@@ -33,7 +33,7 @@ namespace Garage_2.Controllers
 
         // GET: ParkingSessions
         public async Task<IActionResult> Index(
-            [FromQuery(Name = "sortBy")] ParkingSessionsSortBy sortBy = ParkingSessionsSortBy.ParkedTime,
+            [FromQuery(Name = "sortBy")] ParkingSessionsSortBy sortBy = ParkingSessionsSortBy.ArrivalTime,
             [FromQuery(Name = "order")] SortOrder order = SortOrder.Ascending,
             [FromQuery(Name = "limit")] int limit = 50,
             [FromQuery(Name = "page")] int page = 1
