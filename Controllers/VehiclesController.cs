@@ -1,13 +1,16 @@
 ﻿using Garage_2.Data;
+using Garage_2.Extensions;
 using Garage_2.Interfaces;
 using Garage_2.Models;
 using Garage_2.Models.Entities;
 using Garage_2.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NuGet.Protocol;
 using System.Security.Claims;
 
 namespace Garage_2.Controllers
@@ -19,17 +22,23 @@ namespace Garage_2.Controllers
         private readonly GarageConfig _config;
         private readonly IVehicleSearchService _searchService;
         private readonly IParkingService _parkingService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<VehiclesController> _logger;
 
         public VehiclesController(
             GarageContext context,
             IOptions<GarageConfig> config,
             IVehicleSearchService searchService,
-            IParkingService parkingService)
+            IParkingService parkingService,
+            UserManager<ApplicationUser> userManager,
+            ILogger<VehiclesController> logger)
         {
             _context = context;
             _config = config.Value;
             _searchService = searchService;
             _parkingService = parkingService;
+            _userManager = userManager;
+            _logger = logger;
         }
 
         // GET: Vehicles
@@ -324,6 +333,30 @@ namespace Garage_2.Controllers
         public async Task<IActionResult> ParkVehicle(int id)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            ApplicationUser? user = await _userManager.GetUserAsync(User);
+            _logger.LogInformation("*** User: {0}", user?.SSN);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Parse age from SSN
+            var dobString = user.SSN.Split("-")[0];
+            string year = dobString.Substring(0, 4);
+            string month = dobString.Substring(4, 2);
+            string day = dobString.Substring(6, 2);
+            string formattedDobString = string.Format("{0}-{1}-{2}", year, month, day);
+            DateTime dob;
+            DateTime.TryParse(formattedDobString, out dob);
+            int ageInYears = (DateTime.Now - dob).GetYears();
+
+            if (ageInYears < 18 && !User.IsInRole("Admin"))
+            {
+                SetAlertInTempData(AlertType.warning, "You must be at least 18 to park a vehicle.");
+                return RedirectToAction(nameof(Index));
+            }
+            
 
             // Säkerställ ägarskap
             var vehicle = await _context.Vehicles
