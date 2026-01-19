@@ -35,14 +35,16 @@ namespace Garage_2.Controllers
         public async Task<IActionResult> Index(
             [FromQuery(Name = "sortBy")] ParkingSessionsSortBy sortBy = ParkingSessionsSortBy.ArrivalTime,
             [FromQuery(Name = "order")] SortOrder order = SortOrder.Ascending,
-            [FromQuery(Name = "limit")] int limit = 50,
+            [FromQuery(Name = "limit")] int limit = 10,
             [FromQuery(Name = "page")] int page = 1
         )
         {
             ParkingSessionsListParameters listParameters = new()
             {
                 SortBy = sortBy,
-                SortOrder = order
+                SortOrder = order,
+                PageLimit = limit,
+                CurrentPage = page
             };
 
             var garageContext = _context.ParkingSessions.Include(p => p.Vehicle);
@@ -58,6 +60,8 @@ namespace Garage_2.Controllers
                     .ThenInclude(v => v.User)
                 .Where(ps => isAdmin || ps.Vehicle.ApplicationUserId == userId);
 
+            int itemsCount = parkingSessionsQuery.Count();
+
             IEnumerable<ParkingSessionsListItemViewModel> parkingSessionsListItems = await parkingSessionsQuery.Select(parkingSession => new ParkingSessionsListItemViewModel()
             {
                 Id = parkingSession.Id,
@@ -72,7 +76,10 @@ namespace Garage_2.Controllers
             .ToListAsync();
 
             // SortByWithOrder extension defined in Extensions/ParkingSessionsExtensions
-            var orderedParkingSessionsListItems = parkingSessionsListItems.SortByWithOrder(sortBy, order);
+            var orderedParkingSessionsListItems = parkingSessionsListItems
+            .SortByWithOrder(sortBy, order)
+            .Skip(limit * (page - 1))
+            .Take(limit);
 
             ParkingSessionsIndexViewModel viewModel = new()
             {
@@ -81,6 +88,10 @@ namespace Garage_2.Controllers
                 ParkingSessionsList = orderedParkingSessionsListItems,
                 CurrentTotal = parkingSessionsListItems.Sum(ps => ps.CurrentCost)
             };
+
+            viewModel.ListParameters.ItemsCount = itemsCount;
+            viewModel.ListParameters.FilteredItemsCount = orderedParkingSessionsListItems.Count();
+            viewModel.ListParameters.TotalPages = (int)Math.Ceiling((double)itemsCount / limit);
             
             return View(viewModel);
         }

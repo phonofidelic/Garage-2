@@ -141,4 +141,14 @@
             </tr>
         }
     </tbody>
+
 </table>
+
+@if (Model.ListParameters.TotalPages > 1)
+{
+    for (var i = 1; i <= Model.ListParameters.TotalPages; i++)
+    {
+        <a asp-route-page="@i" asp-route-sortBy="@Model.ListParameters.SortBy" asp-route-order="@Model.ListParameters.SortOrder"
+            class="btn btn-sm @(i == Model.ListParameters.CurrentPage ? "btn-primary" : "btn-outline-primary")">@i</a>
+    }
+}
