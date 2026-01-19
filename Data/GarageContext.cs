@@ -101,7 +101,7 @@ namespace Garage_2.Data
 
             // VEHICLEPARKING (join-tabell mellan ParkingSession och ParkingSpotV2)
             // --------------------------------------------------------------------
-            // 1:1 relation mellan VehicleParking (rad i join-tabellen) och ParkingSession  
+            // 1:1 relation mellan en rad i VehicleParking (join-tabellen) och en rad i ParkingSession  
             // som i sin tur har 1:M relation med VehicleParking (rader join-tabellen)
             modelBuilder.Entity<VehicleParking>()
                 .HasOne(vp => vp.ParkingSession)
@@ -109,7 +109,7 @@ namespace Garage_2.Data
                 .HasForeignKey(vp => vp.ParkingSessionId)
                 .OnDelete(DeleteBehavior.Cascade);  // Cascade - om en ParkingSession tas bort försvinner även alla VehicleParkings-rader på den sessionen
 
-            // 1:1 relation mellan VehicleParking och ParkingSpotV2 
+            // 1:1 relation mellan en rad i VehicleParking och en rad i ParkingSpotV2 
             // som i sin tur har 1:M relation med VehicleParking
             modelBuilder.Entity<VehicleParking>()
                 .HasOne(vp => vp.ParkingSpotV2)
@@ -120,7 +120,8 @@ namespace Garage_2.Data
             // DB-skydd: UnitsUsed måste vara 1..3
             modelBuilder.Entity<VehicleParking>().ToTable(tb => tb.HasCheckConstraint("CK_VehicleParking_UnitsUsed", "[UnitsUsed] BETWEEN 1 AND 3"));
 
-            // Skydd mot att samma session får två rader mot samma spot i VehicleParking
+            // Ingen kompositnyckel skapas, man vill ha eget Id för att tabellen har eget data (UnitsUsed) och ska kunna ses som en egen tabell också
+            // Däremot skydd mot att samma session får två rader mot samma spot i VehicleParking, genom att använda unikt index på de två FK
             modelBuilder.Entity<VehicleParking>().HasIndex(vp => new { vp.ParkingSessionId, vp.ParkingSpotV2Id }).IsUnique();
 
         }
