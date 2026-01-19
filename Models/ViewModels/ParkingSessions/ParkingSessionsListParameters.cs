@@ -9,5 +9,15 @@ namespace Garage_2.Models.ViewModels.ParkingSessions
         public ParkingSessionsSortBy SortBy { get; set; }
 
         public SortOrder SortOrder { get; set; }
+        
+        public int PageLimit { get; set; }
+
+        public int CurrentPage { get; set; }
+
+        public int TotalPages { get; set; }
+
+        public int ItemsCount { get; set; }
+
+        public int FilteredItemsCount { get; set; }
     }
 }
